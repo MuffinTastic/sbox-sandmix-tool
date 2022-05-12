@@ -1,0 +1,14 @@
+{
+  "Title": "s\u0026mix tool",
+  "Type": "tool",
+  "Org": "muffin",
+  "Ident": "sandmix_tool",
+  "Schema": 1,
+  "HasAssets": true,
+  "AssetsPath": "",
+  "ResourcePaths": null,
+  "HasCode": true,
+  "CodePath": "/code/",
+  "RootNamespace": "SandMixTool",
+  "Metadata": {}
+}

@@ -54,8 +54,9 @@ public class AboutDialog : Dialog
 		Layout.Add( infoArea );
 
 		var repoButton = new Button( this );
-		repoButton.Text = $"Visit repo";
+		repoButton.Text = "Visit repo";
 		repoButton.Clicked += () => Process.Start( "explorer", SandMixTool.ProjectRepoURL );
+		repoButton.ToolTip = SandMixTool.ProjectRepoURL;
 		Layout.Add( repoButton );
 	}
 }

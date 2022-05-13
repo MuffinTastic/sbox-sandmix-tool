@@ -1,4 +1,5 @@
 ﻿using Sandbox;
+using SandMixTool.Widgets;
 using System.Text.Json;
 using Tools;
 
@@ -8,6 +9,8 @@ namespace SandMixTool;
 public class MainWindow : Window
 {
 	public static MainWindow Instance { get; set; }
+
+	private MixGraphWidget MixGraph;
 
 	public MainWindow()
 	{
@@ -37,7 +40,7 @@ public class MainWindow : Window
 	{
 		var file = MenuBar.AddMenu( "File" );
 		file.AddOption( "Open" );
-		file.AddOption( "Save" );
+		file.AddOption( "Save" ).Triggered += () => MixGraph?.SaveGraph();
 		file.AddOption( "Quit" ).Triggered += () => Close();
 
 		var view = MenuBar.AddMenu( "View" );
@@ -54,13 +57,13 @@ public class MainWindow : Window
 
 		BuildMenu();
 
-		var mg = new Widgets.MixGraphWidget( this );
-		Dock( mg, DockArea.Left );
+		MixGraph = new MixGraphWidget( this );
+		Dock( MixGraph, DockArea.Left );
 
-		var p = new Widgets.PreviewWidget( this );
+		var p = new PreviewWidget( this );
 		Dock( p, DockArea.Right );
 
-		var i = new Widgets.InspectorWidget( mg.GraphView, this );
+		var i = new InspectorWidget( MixGraph.GraphView, this );
 		Dock( i, DockArea.Right );
 
 		/*{

@@ -1,4 +1,7 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace SandMixTool.NodeGraph;
 
@@ -10,7 +13,7 @@ public abstract class BaseNode
 	[Browsable( false )]
 	public Vector2 Position { get; set; }
 
-	[Browsable( false )]
+	[Browsable( false ), JsonIgnore]
 	public Graph Graph { get; set; }
 
 	public string Name { get; set; }
@@ -19,7 +22,6 @@ public abstract class BaseNode
 	public BaseNode()
 	{
 		Identifier = System.Guid.NewGuid().ToString();
-		Log.Trace( this );
 	}
 
 	public bool IsNamed( string name )
@@ -41,5 +43,4 @@ public abstract class BaseNode
 	{
 
 	}
-
 }

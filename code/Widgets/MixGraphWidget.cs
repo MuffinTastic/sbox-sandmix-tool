@@ -1,5 +1,5 @@
 ﻿using SandMixTool.NodeGraph;
-using SandMixTool.Nodes.Inputs;
+using SandMixTool.Nodes.Audio;
 using SandMixTool.Nodes.Operations;
 using System;
 using Tools;
@@ -19,9 +19,17 @@ public class MixGraphWidget : DockWidget
 	{
 		Widget = new GraphView( this );
 
-		GraphView.AddNodeType<FloatConstantNode>( true );
+		GraphView.AddNodeType<TrackNode>( true );
+		GraphView.AddNodeType<OutputNode>( true );
+
 		GraphView.AddNodeType<FloatAddNode>( true );
 		GraphView.AddNodeType<FloatSubNode>( true );
 		GraphView.AddNodeType<Vec3AddNode>( true );
+	}
+
+	public void SaveGraph()
+	{
+		// open file dialog to get path
+		GraphView.SaveGraph( " " );
 	}
 }

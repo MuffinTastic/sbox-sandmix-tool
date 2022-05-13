@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using Tools;
 
 namespace SandMixTool.NodeGraph;
@@ -39,8 +40,12 @@ public class GraphView : GraphicsView
 		SetHandleConfig( typeof( int ), new HandleConfig { Color = Color.Parse( "#82ba6d" ).Value, Icon = "i", Name = "Integer" } );
 		SetHandleConfig( typeof( float ), new HandleConfig { Color = Color.Parse( "#be9363" ).Value, Icon = "f", Name = "Float" } );
 		SetHandleConfig( typeof( Vector3 ), new HandleConfig { Color = Color.Parse( "#fff08a" ).Value, Icon = "v", Name = "Vector3" } );
-		SetHandleConfig( typeof( string ), new HandleConfig { Color = Color.Parse( "#9bc9c4" ).Value, Icon = "s", Name = "string" } );
-		SetHandleConfig( typeof( bool ), new HandleConfig { Color = Color.Parse( "#b49dc9" ).Value, Icon = "b", Name = "bool" } );
+		SetHandleConfig( typeof( bool ), new HandleConfig { Color = Color.Parse( "#b49dc9" ).Value, Icon = "b", Name = "Boolean" } );
+		SetHandleConfig( typeof( Types.Audio ), new HandleConfig { Color = Color.Parse( "#9dc2d5" ).Value, Icon = "a", Name = "Audio" } );
+
+		Graph = new Graph();
+
+		Utility.Inspect( Graph );
 	}
 
 	protected override void OnWheel( WheelEvent e )
@@ -95,7 +100,7 @@ public class GraphView : GraphicsView
 			var item = new ContextItem
 			{
 				DisplayInfo = display,
-				Action = () => Add( new NodeUI( this, Activator.CreateInstance( node ) as BaseNode ) { Position = clickPos } )
+				Action = () => CreateNode( new NodeUI( this, Activator.CreateInstance( node ) as BaseNode ) { Position = clickPos } )
 			};
 
 			group.Items.Add( item );
@@ -239,11 +244,22 @@ public class GraphView : GraphicsView
 		Add( connection );
 
 		Connections.Add( connection );
+		Log.Info( $"Created connection {nodeOutput.Identifier} → {dropTarget.Identifier}" );
+		Graph?.Connect( nodeOutput.Identifier, dropTarget.Identifier );
+	}
+
+	private void CreateNode( NodeUI node )
+	{
+		Add( node );
+		Graph?.Add( node.Node );
+		Log.Info( $"Created {node.Node.GetType().Name} node {node.Node.Identifier}" );
 	}
 
 	internal void RemoveConnection( Connection c )
 	{
 		Connections.Remove( c );
+		Log.Info( $"Removed connection {c.Output.Identifier} → {c.Input.Identifier}" );
+		Graph?.Disconnect( c.Output.Identifier, c.Input.Identifier );
 	}
 
 	internal void NodePositionChanged( NodeUI node )
@@ -287,6 +303,17 @@ public class GraphView : GraphicsView
 
 			CreateConnection( o, i );
 		}
+	}
+
+	public void SaveGraph( string path )
+	{
+		JsonSerializerOptions options = new() {
+			IncludeFields = true,
+			WriteIndented = true
+		};
+		options.Converters.Add( new BaseNodeConverter( AvailableNodes ) );
+
+		Log.Info( JsonSerializer.Serialize( Graph, typeof( Graph ), options ) );
 	}
 
 	public void SetHandleConfig( System.Type t, HandleConfig config )

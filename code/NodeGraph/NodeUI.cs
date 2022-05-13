@@ -158,20 +158,6 @@ public partial class NodeUI : Tools.GraphicsItem
 		}
 	}
 
-	protected override void OnMousePressed( GraphicsMouseEvent e )
-	{
-		base.OnMousePressed( e );
-
-		//Graph?.OnNodeSelect( Node );
-		//Utility.Inspect( this );
-		//e.Accepted = true;
-	}
-
-	protected override void OnMouseReleased( GraphicsMouseEvent e )
-	{
-		base.OnMouseReleased( e );
-	}
-
 	internal void DraggingOutput( PlugOut nodeOutput, Vector2 scenePosition, Connection source = null )
 	{
 		Graph?.DraggingOutput( this, nodeOutput, scenePosition, source );
@@ -185,6 +171,7 @@ public partial class NodeUI : Tools.GraphicsItem
 	protected override void OnPositionChanged()
 	{
 		Position = Position.SnapToGrid( 16.0f );
+		Node.Position = Position;
 
 		Graph?.NodePositionChanged( this );
 	}

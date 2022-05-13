@@ -8,12 +8,16 @@ public class Plug : Tools.GraphicsItem
 
 	public NodeUI Node { get; protected set; }
 
-	public string Title = "Unnammed Title";
+	public string Title = "Unnamed Title";
 	public System.Reflection.PropertyInfo Property;
+
+	public string Identifier => $"{Node.Node.Identifier}.{Property.Name}";
 
 	public HandleConfig HandleConfig;
 
+#pragma warning disable CS0114
 	public virtual Vector2 HandlePosition => 0;
+#pragma warning restore CS0114
 	public virtual Vector2 HandleCenter => HandlePosition + HandleSize / 2;
 
 	public Plug( NodeUI node, System.Reflection.PropertyInfo property )
@@ -34,7 +38,7 @@ public class Plug : Tools.GraphicsItem
 		Paint.SetBrush( HandleConfig.Color.WithAlpha( 1.0f ) );
 		Paint.DrawRect( handleRect, 2.0f );
 
-		Paint.SetPen( HandleConfig.Color.Darken( 0.25f ) );
+		Paint.SetPen( HandleConfig.Color.Darken( 0.5f ) );
 		Paint.SetDefaultFont( 7, 500 );
 		Paint.DrawText( handleRect, HandleConfig.Icon );
 	}

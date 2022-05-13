@@ -1,10 +1,12 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 
 namespace SandMixTool.NodeGraph;
 
 public class Graph
 {
+	[Browsable( true )]
 	public List<BaseNode> Nodes { get; init; } = new();
 	public List<(string, string)> Connections { get; init; } = new();
 
@@ -19,6 +21,11 @@ public class Graph
 		Nodes.Add( node );
 	}
 
+	public void Remove( BaseNode node )
+	{
+		Nodes.Remove( node );
+	}
+
 	public BaseNode Find( string name )
 	{
 		return Nodes.FirstOrDefault( x => x.IsNamed( name ) );
@@ -27,5 +34,11 @@ public class Graph
 	public void Connect( string from, string to )
 	{
 		Connections.Add( (from, to) );
+		Log.Info( Connections.Count() );
+	}
+
+	public void Disconnect( string from, string to )
+	{
+		Connections.Remove( (from, to) );
 	}
 }

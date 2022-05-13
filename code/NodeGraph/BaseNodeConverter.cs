@@ -1,0 +1,76 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
+namespace SandMixTool.NodeGraph;
+public class BaseNodeConverter : JsonConverter<BaseNode>
+{
+	private List<Type> AvailableNodes;
+
+	public BaseNodeConverter( List<Type> availableNodes )
+	{
+		AvailableNodes = availableNodes;
+	}
+
+	public override bool CanConvert( Type type )
+	{
+		return typeof( BaseNode ).IsAssignableFrom( type );
+	}
+
+	public override BaseNode Read(
+		ref Utf8JsonReader reader,
+		Type typeToConvert,
+		JsonSerializerOptions options )
+	{
+		if ( reader.TokenType != JsonTokenType.StartObject )
+		{
+			throw new JsonException();
+		}
+
+		if ( !reader.Read()
+				|| reader.TokenType != JsonTokenType.PropertyName
+				|| reader.GetString() != "NodeType" )
+		{
+			throw new JsonException();
+		}
+
+		if ( !reader.Read() || reader.TokenType != JsonTokenType.String )
+		{
+			throw new JsonException();
+		}
+
+		BaseNode node;
+
+		string nodeTypeName = reader.GetString();
+
+		var nodeType = AvailableNodes.Where( n => n.Name == nodeTypeName ).FirstOrDefault();
+		if ( nodeType is null )
+		{
+			throw new NotSupportedException();
+		}
+
+		node = (BaseNode)JsonSerializer.Deserialize(ref reader, nodeType);
+
+		if ( !reader.Read() || reader.TokenType != JsonTokenType.EndObject )
+		{
+			throw new JsonException();
+		}
+
+		return node;
+	}
+
+	public override void Write(
+		Utf8JsonWriter writer,
+		BaseNode value,
+		JsonSerializerOptions options )
+	{
+		writer.WriteStartObject();
+
+		writer.WriteString( "NodeType", value.GetType().Name );
+		JsonSerializer.Serialize( writer, value, value.GetType() );
+
+		writer.WriteEndObject();
+	}
+}

@@ -1,6 +1,7 @@
 ﻿using Sandbox;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text.Json;
 using Tools;
@@ -23,6 +24,8 @@ public class GraphView : GraphicsView
 	}
 
 	List<Type> AvailableNodes = new();
+
+	List<NodeUI> Nodes = new();
 	List<Connection> Connections = new();
 
 	public GraphView( Widget parent ) : base( parent )
@@ -44,8 +47,13 @@ public class GraphView : GraphicsView
 		SetHandleConfig( typeof( Types.Audio ), new HandleConfig { Color = Color.Parse( "#9dc2d5" ).Value, Icon = "a", Name = "Audio" } );
 
 		Graph = new Graph();
+	}
 
-		Utility.Inspect( Graph );
+	public override void OnDestroyed()
+	{
+		base.OnDestroyed();
+
+		NodeSelect = null;
 	}
 
 	protected override void OnWheel( WheelEvent e )
@@ -209,16 +217,14 @@ public class GraphView : GraphicsView
 
 	public Action<BaseNode, bool> NodeSelect;
 
-	internal void OnNodeSelect( BaseNode node )
-	{
-		//NodeSelect( node, true );
-	}
-
 	protected override void OnMousePress( MouseEvent e )
 	{
 		base.OnMousePress( e );
 
 		var item = GetItemAt( ToScene( e.LocalPosition ) );
+
+		if ( NodeSelect == null )
+			Log.Info( (Parent as DockWidget).Title );
 
 		if ( item is NodeUI node )
 		{
@@ -231,6 +237,14 @@ public class GraphView : GraphicsView
 		else
 		{
 			NodeSelect( null, false );
+		}
+	}
+
+	public void UnfocusAllNodes()
+	{
+		foreach ( var node in Nodes )
+		{
+			node.Selected = false;
 		}
 	}
 
@@ -250,9 +264,18 @@ public class GraphView : GraphicsView
 
 	private void CreateNode( NodeUI node )
 	{
+		Nodes.Add( node );
 		Add( node );
 		Graph?.Add( node.Node );
 		Log.Info( $"Created {node.Node.GetType().Name} node {node.Node.Identifier}" );
+	}
+
+	private void RemoveNode( NodeUI node )
+	{
+		Nodes.Remove( node );
+		Graph?.Remove( node.Node );
+		node.Destroy();
+		Log.Info( $"Removed {node.Node.GetType().Name} node {node.Node.Identifier}" );
 	}
 
 	internal void RemoveConnection( Connection c )
@@ -305,7 +328,7 @@ public class GraphView : GraphicsView
 		}
 	}
 
-	public void SaveGraph( string path )
+	public async void SaveGraph( string path )
 	{
 		JsonSerializerOptions options = new() {
 			IncludeFields = true,
@@ -313,7 +336,9 @@ public class GraphView : GraphicsView
 		};
 		options.Converters.Add( new BaseNodeConverter( AvailableNodes ) );
 
-		Log.Info( JsonSerializer.Serialize( Graph, typeof( Graph ), options ) );
+		var json = JsonSerializer.Serialize( Graph, typeof( Graph ), options );
+
+		await File.WriteAllTextAsync( path, json );
 	}
 
 	public void SetHandleConfig( System.Type t, HandleConfig config )

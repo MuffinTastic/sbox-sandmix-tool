@@ -6,7 +6,7 @@ namespace SandMixTool.Widgets;
 
 public class PreviewWidget : DockWidget
 {
-	public PreviewWidget( Widget parent = null ) : base( "Preview", "preview", parent )
+	public PreviewWidget( GraphView graphView, Widget parent = null ) : base( "Preview", "preview", parent )
 	{
 		CreateUI();
 	}
@@ -14,5 +14,15 @@ public class PreviewWidget : DockWidget
 	private void CreateUI()
 	{
 		Widget = new Widget( this );
+	}
+
+	public void SetGraphView( GraphView graphView )
+	{
+
+	}
+
+	public void UnsetGraphView()
+	{
+		
 	}
 }

@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using Tools;
 
-namespace SandMixTool;
+namespace SandMixTool.Dialogs;
 
 public class AboutDialog : Dialog
 {

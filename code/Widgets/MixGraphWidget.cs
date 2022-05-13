@@ -10,8 +10,9 @@ public class MixGraphWidget : DockWidget
 {
 	internal GraphView GraphView => Widget as GraphView;
 
-	public MixGraphWidget( Widget parent = null ) : base( "Mix Graph", "account_tree", parent )
+	public MixGraphWidget( string title, Widget parent = null ) : base( title, "account_tree", parent )
 	{
+
 		CreateUI();
 	}
 
@@ -27,9 +28,11 @@ public class MixGraphWidget : DockWidget
 		GraphView.AddNodeType<Vec3AddNode>( true );
 	}
 
-	public void SaveGraph()
+	protected override void OnMousePress( MouseEvent e )
 	{
-		// open file dialog to get path
-		GraphView.SaveGraph( " " );
+		base.OnMousePress( e );
+
+		var mainWindow = Parent as MainWindow;
+		mainWindow.MixGraphFocus( this );
 	}
 }

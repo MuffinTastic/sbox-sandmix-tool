@@ -2,20 +2,23 @@
 using System.Collections.Generic;
 using System.Linq;
 using Sandbox;
+using SandMixTool.NodeGraph;
 
 namespace SandMixTool.Widgets;
 
 public class InspectorWidget : DockWidget
 {
-	NodeGraph.GraphView GraphView;
+	GraphView CurrentGraphView;
 	Widget Editor;
 	InspectorHeader Header;
 
 	public string CurrentTime => System.DateTime.Now.ToString();
 
 
-	public InspectorWidget( NodeGraph.GraphView graphView, Widget parent = null ) : base( "Inspector", "manage_search", parent )
+	public InspectorWidget( Widget parent = null ) : base( "Inspector", "manage_search", parent )
 	{
+		MinimumSize = new Vector2( 400, 100 );
+
 		Widget = new Widget( this );
 
 		Widget.SetLayout( LayoutMode.TopToBottom );
@@ -29,20 +32,18 @@ public class InspectorWidget : DockWidget
 
 		Widget.Layout.Add( Editor, -1 );
 
-		GraphView = graphView;
 		//Utility.OnInspect += StartInspecting;
-		GraphView.NodeSelect += StartInspecting;
 
 		// Debug - start inspecting self
 		StartInspecting( null );
 	}
 
-	private void StartInspecting( NodeGraph.BaseNode node )
+	public void StartInspecting( BaseNode node )
 	{
 		StartInspecting( node, true );
 	}
 
-	private void StartInspecting( NodeGraph.BaseNode node, bool addToHistory = true )
+	public void StartInspecting( BaseNode node, bool addToHistory = true )
 	{
 		using var sx = new SuspendUpdates( this );
 
@@ -96,13 +97,6 @@ public class InspectorWidget : DockWidget
 	private void JumpToHistory()
 	{
 		StartInspecting( ObjectHistory[HistoryPlace], false );
-	}
-
-	public override void OnDestroyed()
-	{
-		base.OnDestroyed();
-
-		GraphView.NodeSelect -= StartInspecting;
 	}
 
 	protected override void OnMousePress( MouseEvent e )

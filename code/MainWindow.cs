@@ -1,5 +1,7 @@
 ﻿using Sandbox;
+using SandMixTool.NodeGraph;
 using SandMixTool.Widgets;
+using System;
 using System.Text.Json;
 using Tools;
 
@@ -8,20 +10,14 @@ namespace SandMixTool;
 [Tool( SandMixTool.ProjectName, "surround_sound", SandMixTool.ProjectTagline )]
 public class MainWindow : Window
 {
-	public static MainWindow Instance { get; set; }
+	public Action<MixGraphWidget> MixGraphFocus;
 
-	private MixGraphWidget MixGraph;
+	private PreviewWidget Preview;
+	private InspectorWidget Inspector;
+	private MixGraphWidget CurrentMixGraph;
 
 	public MainWindow()
 	{
-		Log.Info( Instance );
-		
-		if ( Instance is not null )
-		{
-			Destroy();
-			Instance.Focus();
-		}
-
 		Title = SandMixTool.ProjectName;
 		Size = new Vector2( 1920, 1080 );
 
@@ -29,18 +25,11 @@ public class MainWindow : Window
 		Show();
 	}
 
-	public override void OnDestroyed()
-	{
-		base.OnDestroyed();
-
-		Instance = null;
-	}
-
 	public void BuildMenu()
 	{
 		var file = MenuBar.AddMenu( "File" );
 		file.AddOption( "Open" );
-		file.AddOption( "Save" ).Triggered += () => MixGraph?.SaveGraph();
+		file.AddOption( "Save" ).Triggered += () => SaveMixGraph();
 		file.AddOption( "Quit" ).Triggered += () => Close();
 
 		var view = MenuBar.AddMenu( "View" );
@@ -48,7 +37,7 @@ public class MainWindow : Window
 		var help = MenuBar.AddMenu( "Help" );
 		help.AddOption( "Documentation" );
 		help.AddSeparator();
-		help.AddOption( "About" ).Triggered += () => new AboutDialog( this ).Show();
+		help.AddOption( "About" ).Triggered += () => new Dialogs.AboutDialog( this ).Show();
 	}
 
 	public void CreateUI()
@@ -57,45 +46,47 @@ public class MainWindow : Window
 
 		BuildMenu();
 
-		MixGraph = new MixGraphWidget( this );
-		Dock( MixGraph, DockArea.Left );
+		MixGraphFocus += SetGraphView;
 
-		var p = new PreviewWidget( this );
-		Dock( p, DockArea.Right );
+		Preview = new PreviewWidget( null, this );
+		Dock( Preview, DockArea.Right );
 
-		var i = new InspectorWidget( MixGraph.GraphView, this );
-		Dock( i, DockArea.Right );
+		Inspector = new InspectorWidget( this );
+		Dock( Inspector, DockArea.Right );
 
-		/*{
-			var e = new Curve2DEditor( this );
-			e.Bind( "Value" ).From( this, x => x.Curve );
-			e.ValueRange = new Vector2( 100, 0 );
-			w.Layout.Add( e );
-		}
-
-		var right = w.Layout.Add( LayoutMode.TopToBottom );
-		right.Spacing = 8;
-		{
-			var e = new Curve2DEditor( this );
-			e.Bind( "Value" ).From( this, x => x.Curve );
-			e.ValueRange = new Vector2( 100, 0 );
-			right.Add( e );
-		}
-
-		{
-			var e = new Curve2DEditor( this );
-			e.Bind( "Value" ).From( this, x => x.Curve );
-			e.ValueRange = new Vector2( 100, 0 );
-			right.Add( e );
-		}
-		*/
+		CreateMixGraph();
+		CreateMixGraph();
 	}
 
-	protected override void OnPaint()
+	public void CreateMixGraph()
 	{
-		base.OnPaint();
+		var mg = new MixGraphWidget( "Mix Graph", this );
+		Dock( mg, DockArea.Left, CurrentMixGraph );
 
-		//Paint.DrawText( 0, JsonSerializer.Serialize( Curve ) );
+		mg.GraphView.NodeSelect += Inspector.StartInspecting;
+	}
+
+	public void SetGraphView( MixGraphWidget graphView )
+	{
+		CurrentMixGraph?.GraphView.UnfocusAllNodes();
+		CurrentMixGraph = graphView;
+	}
+
+	public void SaveMixGraph()
+	{
+		if ( CurrentMixGraph is null )
+			return;
+
+		var fd = new FileDialog( this );
+
+		fd.Title = "Save as...";
+		fd.SetNameFilter( SandMixTool.FileFilter );
+		fd.SetFindFile();
+
+		if ( fd.Execute() )
+		{
+			CurrentMixGraph.GraphView.SaveGraph( fd.SelectedFile );
+		}
 	}
 
 	[Sandbox.Event.Hotload]

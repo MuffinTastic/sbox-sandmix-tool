@@ -7,4 +7,7 @@ public static class SandMixTool
 	public const string ProjectVersion = "0.0.1";
 	public const string ProjectRepoURL = "https://www.example.com/";
 	public static readonly string[] Authors = { "MuffinTastic" };
+
+	public const string FileExtension = "smix";
+	public const string FileFilter = $"{ProjectName} (*.{FileExtension});;All files (*.*)";
 }

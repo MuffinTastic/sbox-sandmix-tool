@@ -1,19 +1,20 @@
 ﻿using Tools;
 
-namespace SandMixTool.NodeEditor;
+namespace SandMixTool.NodeGraph;
 
 public class Plug : Tools.GraphicsItem
 {
-	protected const float handleSize = 14;
+	public const float HandleSize = 14;
 
 	public NodeUI Node { get; protected set; }
 
 	public string Title = "Unnammed Title";
 	public System.Reflection.PropertyInfo Property;
 
-
-
 	public HandleConfig HandleConfig;
+
+	public virtual Vector2 HandlePosition => 0;
+	public virtual Vector2 HandleCenter => HandlePosition + HandleSize / 2;
 
 	public Plug( NodeUI node, System.Reflection.PropertyInfo property )
 	{

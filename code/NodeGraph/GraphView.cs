@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Tools;
 
-namespace SandMixTool.NodeEditor;
+namespace SandMixTool.NodeGraph;
 
 public class GraphView : GraphicsView
 {
@@ -56,19 +56,68 @@ public class GraphView : GraphicsView
 		AvailableNodes.Add( typeof( T ) );
 	}
 
+	private class ContextGroup
+	{
+		public string Name;
+		public List<ContextItem> Items;
+	}
+
+	private class ContextItem
+	{
+		public DisplayInfo DisplayInfo;
+		public Action Action;
+	}
+
 	protected override void OnContextMenu( ContextMenuEvent e )
 	{
 		var clickPos = ToScene( e.LocalPosition );
 
-		var menu = new Menu( this );
+		var groups = new List<ContextGroup>();
 
+		// Add all nodes
 		foreach ( var node in AvailableNodes )
 		{
 			var display = DisplayInfo.ForType( node );
 
-			var action = menu.AddOption( display.Name, display.Icon );
-			action.StatusText = display.Description;
-			action.Triggered += () => Add( new NodeUI( this, Activator.CreateInstance( node ) as BaseNode ) { Position = clickPos } );
+			var groupName = display.Group ?? "Other";
+
+			var group = groups.Where( g => g.Name == groupName ).FirstOrDefault();
+			if ( group is null )
+			{
+				group = new ContextGroup
+				{
+					Name = groupName,
+					Items = new List<ContextItem>()
+				};
+				groups.Add( group );
+			}
+
+			var item = new ContextItem
+			{
+				DisplayInfo = display,
+				Action = () => Add( new NodeUI( this, Activator.CreateInstance( node ) as BaseNode ) { Position = clickPos } )
+			};
+
+			group.Items.Add( item );
+		}
+
+		var menu = new Menu( this );
+
+		// Sort and add the nodes
+		groups.Sort((a, b) => a.Name.CompareTo( b.Name ) );
+		
+		foreach ( var group in groups )
+		{
+			group.Items.Sort((a, b) => a.DisplayInfo.Name.CompareTo( b.DisplayInfo.Name ) );
+			
+			var subMenu = menu.AddMenu( group.Name );
+
+			foreach ( var item in group.Items )
+			{
+				var action = subMenu.AddOption( item.DisplayInfo.Name, item.DisplayInfo.Icon );
+				action.StatusText = item.DisplayInfo.Description;
+				action.Triggered = item.Action;
+			}
 		}
 
 		menu.OpenAt( e.ScreenPosition );
@@ -98,12 +147,22 @@ public class GraphView : GraphicsView
 
 	Connection Preview;
 
-	internal void DraggingOutput( NodeUI node, NodeEditor.PlugOut nodeOutput, Vector2 scenePosition, Connection source )
+	internal void DraggingOutput( NodeUI node, NodeGraph.PlugOut nodeOutput, Vector2 scenePosition, Connection source )
 	{
 		var item = GetItemAt( scenePosition );
 
 		DropTarget?.Update();
-		DropTarget = item as NodeEditor.PlugIn;
+		DropTarget = item as NodeGraph.PlugIn;
+		if ( DropTarget is not null )
+		{
+			var OutputType = nodeOutput.Property.PropertyType;
+			var InputType = DropTarget.Property.PropertyType;
+
+			if ( nodeOutput.Node == DropTarget.Node || OutputType != InputType )
+			{
+				DropTarget = null;
+			}
+		}
 		DropTarget?.Update();
 
 		if ( Preview == null )
@@ -115,27 +174,59 @@ public class GraphView : GraphicsView
 		Preview.LayoutForPreview( nodeOutput, scenePosition, DropTarget );
 	}
 
-	internal void DroppedOutput( NodeUI node, NodeEditor.PlugOut nodeOutput, Vector2 scenePosition, Connection source )
+	internal void DroppedOutput( NodeUI node, NodeGraph.PlugOut nodeOutput, Vector2 scenePosition, Connection source )
 	{
-		if ( source != null )
+		try
 		{
-			// Dropped on the same connection it was already connected to
-			if ( source.Input == DropTarget ) return;
+			if ( source != null )
+			{
+				// Dropped on the same connection it was already connected to
+				if ( source.Input == DropTarget ) return;
 
-			source.Disconnect();
-			source.Destroy();
+				source.Disconnect();
+				source.Destroy();
+			}
+
+			if ( DropTarget != null )
+			{
+				CreateConnection( nodeOutput, DropTarget );
+			}
 		}
-
-		if ( DropTarget != null )
+		finally
 		{
-			CreateConnection( nodeOutput, DropTarget );
+			Preview?.Destroy();
+			Preview = null;
+
+			DropTarget?.Update();
+			DropTarget = null;
 		}
+	}
 
-		Preview?.Destroy();
-		Preview = null;
+	public Action<BaseNode, bool> NodeSelect;
 
-		DropTarget?.Update();
-		DropTarget = null;
+	internal void OnNodeSelect( BaseNode node )
+	{
+		//NodeSelect( node, true );
+	}
+
+	protected override void OnMousePress( MouseEvent e )
+	{
+		base.OnMousePress( e );
+
+		var item = GetItemAt( ToScene( e.LocalPosition ) );
+
+		if ( item is NodeUI node )
+		{
+			NodeSelect( node.Node, true );
+		}
+		else if ( item is Plug plug )
+		{
+			NodeSelect( plug.Node.Node, true );
+		}
+		else
+		{
+			NodeSelect( null, false );
+		}
 	}
 
 	private void CreateConnection( PlugOut nodeOutput, PlugIn dropTarget )

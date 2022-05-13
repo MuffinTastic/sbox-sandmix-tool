@@ -5,18 +5,9 @@ namespace SandMixTool;
 public class feeffe
 {
 	//
-	// An Editor menu will put the option in the main editor's menu
-	//
-	[Menu( "Editor", "My Editor Stuff/Example Menu Option" )]
-	public static void ExampleMenuOption()
-	{
-		Log.Info( "Menu option selected! Well done!" );
-	}
-
-	//
 	// A dock is one of those tabby floaty windows, like the console and the addon manager.
 	//
-	[Dock( "Editor", "My Example Dock", "snippet_folder" )]
+	[Dock( SandMixTool.ProjectName, "My Example Dock", "snippet_folder" )]
 	public class MyExampleDock : Widget
 	{
 		Color color;

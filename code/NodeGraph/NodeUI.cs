@@ -4,7 +4,7 @@ using System.Linq;
 using System.Reflection;
 using Tools;
 
-namespace SandMixTool.NodeEditor;
+namespace SandMixTool.NodeGraph;
 
 public partial class NodeUI : Tools.GraphicsItem
 {
@@ -68,8 +68,8 @@ public partial class NodeUI : Tools.GraphicsItem
 		var outputHeight = Outputs.Sum( x => x.Size.y );
 
 		var top = TitleHeight;
-		var columnWidth = 128.0f;
-		var width = columnWidth * 2;
+		var columnWidth = 160.0f;
+		var width = columnWidth * 1.6f;
 
 		if ( Inputs.Count == 0 ) width = columnWidth;
 		if ( Outputs.Count == 0 ) width = columnWidth;
@@ -148,7 +148,9 @@ public partial class NodeUI : Tools.GraphicsItem
 				rect.left += 18;
 			}
 
-			var title = Node.GetTitle() ?? DisplayInfo.Name;
+			var title = DisplayInfo.Name;
+			if ( !String.IsNullOrEmpty( Node.Name ) )
+				title += $" - {Node.Name}";
 
 			Paint.SetDefaultFont( 7, 500 );
 			Paint.SetPen( PrimaryColor );
@@ -156,11 +158,18 @@ public partial class NodeUI : Tools.GraphicsItem
 		}
 	}
 
+	protected override void OnMousePressed( GraphicsMouseEvent e )
+	{
+		base.OnMousePressed( e );
+
+		//Graph?.OnNodeSelect( Node );
+		//Utility.Inspect( this );
+		//e.Accepted = true;
+	}
+
 	protected override void OnMouseReleased( GraphicsMouseEvent e )
 	{
 		base.OnMouseReleased( e );
-
-
 	}
 
 	internal void DraggingOutput( PlugOut nodeOutput, Vector2 scenePosition, Connection source = null )

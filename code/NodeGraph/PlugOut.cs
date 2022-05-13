@@ -1,6 +1,6 @@
 ﻿using Tools;
 
-namespace SandMixTool.NodeEditor;
+namespace SandMixTool.NodeGraph;
 
 public class PlugOut : Plug
 {
@@ -15,15 +15,14 @@ public class PlugOut : Plug
 		Cursor = CursorShape.Finger;
 	}
 
+	public override Vector2 HandlePosition => new Vector2( Size.x - HandleSize, (Size.y - HandleSize) * 0.5f );
+
+
 	protected override void OnPaint()
 	{
 		var highlight = Paint.HasMouseOver;
 
-		var rect = new Rect();
-		rect.Size = Size;
-
 		var spacex = 7;
-
 
 		var color = HandleConfig.Color;
 
@@ -32,12 +31,12 @@ public class PlugOut : Plug
 			color = color.Desaturate( 0.2f ).Darken( 0.3f );
 		}
 
-		var handleRect = new Rect( rect.width - handleSize, (rect.height - handleSize) * 0.5f, handleSize, handleSize );
+		var handleRect = new Rect( HandlePosition.x, HandlePosition.y, HandleSize, HandleSize );
 		DrawHandle( color, handleRect );
 
 		Paint.SetDefaultFont();
 		Paint.SetPen( color );
-		Paint.DrawText( new Rect( spacex, 0, rect.width - handleSize - spacex * 2, rect.Size.y ), Title, TextFlag.RightCenter );
+		Paint.DrawText( new Rect( spacex, 0, Size.x - HandleSize - spacex * 2, Size.y ), Title, TextFlag.RightCenter );
 	}
 
 

@@ -1,6 +1,6 @@
 ﻿using Tools;
 
-namespace SandMixTool.NodeEditor;
+namespace SandMixTool.NodeGraph;
 
 public class Connection : Tools.GraphicsLine
 {
@@ -52,18 +52,21 @@ public class Connection : Tools.GraphicsLine
 		PaintLine();
 	}
 
-	internal void LayoutForPreview( NodeEditor.PlugOut nodeOutput, Vector2 scenePosition, NodeEditor.PlugIn dropTarget )
+	internal void LayoutForPreview( NodeGraph.PlugOut nodeOutput, Vector2 scenePosition, NodeGraph.PlugIn dropTarget )
 	{
 		Output = nodeOutput;
 		Input = dropTarget;
 
-		if ( Output != null && Input != null )
+		var OutputType = Output?.Property.PropertyType;
+		var InputType = Input?.Property.PropertyType;
+
+		if ( Output != null && Input != null && OutputType == InputType )
 		{
 			Layout();
 			return;
 		}
 
-		var rect = new Rect( nodeOutput.HandlePosition );
+		var rect = new Rect( nodeOutput.Node.Position + nodeOutput.Position + nodeOutput.HandleCenter );
 		rect = rect.AddPoint( scenePosition );
 
 		rect.Position -= 100.0f;
@@ -77,7 +80,7 @@ public class Connection : Tools.GraphicsLine
 		PreviewPosition = FromScene( scenePosition );
 		var legde = new Vector2( 20, 0 );
 
-		var startPos = FromScene( Output.HandlePosition );
+		var startPos = FromScene( Output.Node.Position + Output.Position + Output.HandleCenter );
 
 		MoveTo( startPos );
 		startPos += legde;
@@ -91,8 +94,8 @@ public class Connection : Tools.GraphicsLine
 
 	public void Layout()
 	{
-		var rect = new Rect( Output.HandlePosition );
-		rect = rect.AddPoint( Input.HandlePosition );
+		var rect = new Rect( Output.Node.Position + Output.Position + Output.HandleCenter );
+		rect = rect.AddPoint( Input.Node.Position + Input.Position + Input.HandleCenter );
 
 		rect.Position -= 100.0f;
 		rect.Size += 200.0f;
@@ -104,8 +107,8 @@ public class Connection : Tools.GraphicsLine
 
 		var legde = new Vector2( 16, 0 );
 
-		var startPos = FromScene( Output.HandlePosition );
-		var endPos = FromScene( Input.HandlePosition ) - legde;
+		var startPos = FromScene( Output.Node.Position + Output.Position + Output.HandleCenter );
+		var endPos = FromScene( Input.Node.Position + Input.Position + Input.HandleCenter ) - legde;
 
 		MoveTo( startPos );
 		startPos += legde;

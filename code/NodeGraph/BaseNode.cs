@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace SandMixTool.NodeEditor;
+namespace SandMixTool.NodeGraph;
 
 public abstract class BaseNode
 {
@@ -13,14 +13,13 @@ public abstract class BaseNode
 	[Browsable( false )]
 	public Graph Graph { get; set; }
 
+	public string Name { get; set; }
+	public string Comment { get; set; }
+
 	public BaseNode()
 	{
 		Identifier = System.Guid.NewGuid().ToString();
-	}
-
-	public virtual string GetTitle()
-	{
-		return null;
+		Log.Trace( this );
 	}
 
 	public bool IsNamed( string name )
@@ -34,6 +33,11 @@ public abstract class BaseNode
 	}
 
 	public class OutputAttribute : System.Attribute
+	{
+
+	}
+
+	public class ConstantAttribute : System.Attribute
 	{
 
 	}

@@ -4,30 +4,33 @@ using Tools;
 
 namespace SandMixTool;
 
-[Tool( "s&mix", "surround_sound", "Dynamic node-based sound mixer!" )]
+[Tool( SandMixTool.ProjectName, "surround_sound", SandMixTool.ProjectTagline )]
 public class MainWindow : Window
 {
-	/*
-	[Menu( "Editor", "Help/About", "info" )]
-	public static void OpenWindow()
-	{
-		Log.Info( "Open Window!" );
-	}
-
-	[Menu( "Hammer", "Sbox/About", "info" )]
-	public static void OpenWindow2()
-	{
-		new SandMixTool();
-	}
-	*/
+	public static MainWindow Instance { get; set; }
 
 	public MainWindow()
 	{
-		Title = "s&mix";
+		Log.Info( Instance );
+		
+		if ( Instance is not null )
+		{
+			Destroy();
+			Instance.Focus();
+		}
+
+		Title = SandMixTool.ProjectName;
 		Size = new Vector2( 1920, 1080 );
 
 		CreateUI();
 		Show();
+	}
+
+	public override void OnDestroyed()
+	{
+		base.OnDestroyed();
+
+		Instance = null;
 	}
 
 	public void BuildMenu()
@@ -37,13 +40,13 @@ public class MainWindow : Window
 		file.AddOption( "Save" );
 		file.AddOption( "Quit" ).Triggered += () => Close();
 
+		var view = MenuBar.AddMenu( "View" );
+
 		var help = MenuBar.AddMenu( "Help" );
 		help.AddOption( "Documentation" );
 		help.AddSeparator();
 		help.AddOption( "About" ).Triggered += () => new AboutDialog( this ).Show();
 	}
-
-	public Curve2D Curve { get; set; }
 
 	public void CreateUI()
 	{
@@ -51,17 +54,14 @@ public class MainWindow : Window
 
 		BuildMenu();
 
-		var c = new Curve2D();
-		c.AddPoint( 0, 0 );
-		c.AddPoint( 0.2f, 20 );
-		c.AddPoint( 0.5f, 60 );
-		c.AddPoint( 0.8f, 10 );
-		Curve = c;
+		var mg = new Widgets.MixGraphWidget( this );
+		Dock( mg, DockArea.Left );
 
-		var w = new Widget( null );
-		w.SetLayout( LayoutMode.LeftToRight );
-		w.Layout.Margin = 32;
-		w.Layout.Spacing = 8;
+		var p = new Widgets.PreviewWidget( this );
+		Dock( p, DockArea.Right );
+
+		var i = new Widgets.InspectorWidget( mg.GraphView, this );
+		Dock( i, DockArea.Right );
 
 		/*{
 			var e = new Curve2DEditor( this );
@@ -86,8 +86,6 @@ public class MainWindow : Window
 			right.Add( e );
 		}
 		*/
-
-		Canvas = w;
 	}
 
 	protected override void OnPaint()

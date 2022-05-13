@@ -17,7 +17,8 @@ public class InspectorWidget : DockWidget
 
 	public InspectorWidget( Widget parent = null ) : base( "Inspector", "manage_search", parent )
 	{
-		MinimumSize = new Vector2( 400, 100 );
+		//MinimumSize = new Vector2( 400, 100 );
+		//Size = new Vector2( 400, 400 );
 
 		Widget = new Widget( this );
 

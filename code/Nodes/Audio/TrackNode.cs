@@ -6,7 +6,7 @@ using Tools;
 
 namespace SandMixTool.Nodes.Audio;
 
-[Display( Name = "Track", Description = "Audio track - Sources from a .wav file", GroupName = "Audio" )]
+[Library, Display( Name = "Track", Description = "Audio track - Sources from a .wav file", GroupName = "Audio" )]
 public class TrackNode : BaseNode
 {
 	[ResourceType( "vsnd" )]

@@ -1,10 +1,11 @@
-﻿using SandMixTool.NodeGraph;
+﻿using Sandbox;
+using SandMixTool.NodeGraph;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
 namespace SandMixTool.Nodes.Operations;
 
-[Display( Name = "Add Float", Description = "Add two floats together", GroupName = "Operations" )]
+[Library, Display( Name = "Add Float", Description = "Add two floats together", GroupName = "Operations" )]
 public class FloatAddNode : BaseNode
 {
 	[Input]

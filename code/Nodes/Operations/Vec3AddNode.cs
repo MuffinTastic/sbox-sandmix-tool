@@ -1,10 +1,11 @@
-﻿using SandMixTool.NodeGraph;
+﻿using Sandbox;
+using SandMixTool.NodeGraph;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
 namespace SandMixTool.Nodes.Operations;
 
-[Display( Name = "Add Vector3", Description = "Add two Vector3s together", GroupName = "Operations" )]
+[Library, Display( Name = "Add Vector3", Description = "Add two Vector3s together", GroupName = "Operations" )]
 public class Vec3AddNode : BaseNode
 {
 	[Input]

@@ -1,10 +1,11 @@
-﻿using SandMixTool.NodeGraph;
+﻿using Sandbox;
+using SandMixTool.NodeGraph;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
 namespace SandMixTool.Nodes.Operations;
 
-[Display( Name = "Sub Float", Description = "Subtract one float from another", GroupName = "Operations" )]
+[Library, Display( Name = "Sub Float", Description = "Subtract one float from another", GroupName = "Operations" )]
 public class FloatSubNode : BaseNode
 {
 	[Input]

@@ -28,6 +28,8 @@ public class GraphView : GraphicsView
 	List<NodeUI> Nodes = new();
 	List<Connection> Connections = new();
 
+	public Action<BaseNode, bool> NodeSelect;
+
 	public GraphView( Widget parent ) : base( parent )
 	{
 		Antialiasing = true;
@@ -171,7 +173,11 @@ public class GraphView : GraphicsView
 			var OutputType = nodeOutput.Property.PropertyType;
 			var InputType = DropTarget.Property.PropertyType;
 
-			if ( nodeOutput.Node == DropTarget.Node || OutputType != InputType )
+			var connectedCount = Connections.Where( c => c.Input == DropTarget ).Count();
+
+			if ( nodeOutput.Node == DropTarget.Node ||	// Same node as was selected before
+				OutputType != InputType ||				// Incompatible type
+				connectedCount != 0 )					// Other nodes are already connected
 			{
 				DropTarget = null;
 			}
@@ -214,8 +220,6 @@ public class GraphView : GraphicsView
 			DropTarget = null;
 		}
 	}
-
-	public Action<BaseNode, bool> NodeSelect;
 
 	protected override void OnMousePress( MouseEvent e )
 	{

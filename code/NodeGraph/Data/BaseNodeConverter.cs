@@ -3,17 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Sandbox;
 
-namespace SandMixTool.NodeGraph;
+namespace SandMixTool.NodeGraph.Data;
 public class BaseNodeConverter : JsonConverter<BaseNode>
 {
-	private List<Type> AvailableNodes;
-
-	public BaseNodeConverter( List<Type> availableNodes )
-	{
-		AvailableNodes = availableNodes;
-	}
-
 	public override bool CanConvert( Type type )
 	{
 		return typeof( BaseNode ).IsAssignableFrom( type );
@@ -45,13 +39,14 @@ public class BaseNodeConverter : JsonConverter<BaseNode>
 
 		string nodeTypeName = reader.GetString();
 
-		var nodeType = AvailableNodes.Where( n => n.Name == nodeTypeName ).FirstOrDefault();
+		//var nodeType = AvailableNodes.Where( n => n.Name == nodeTypeName ).FirstOrDefault();
+		var nodeType = Library.GetType( nodeTypeName );
 		if ( nodeType is null )
 		{
 			throw new NotSupportedException();
 		}
 
-		node = (BaseNode)JsonSerializer.Deserialize(ref reader, nodeType);
+		node = (BaseNode)JsonSerializer.Deserialize( ref reader, nodeType );
 
 		if ( !reader.Read() || reader.TokenType != JsonTokenType.EndObject )
 		{

@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace SandMixTool.NodeGraph;
+namespace SandMixTool.NodeGraph.Data;
 
 public abstract class BaseNode
 {
@@ -21,25 +21,25 @@ public abstract class BaseNode
 
 	public BaseNode()
 	{
-		Identifier = System.Guid.NewGuid().ToString();
+		Identifier = Guid.NewGuid().ToString();
 	}
 
 	public bool IsNamed( string name )
 	{
-		return string.Equals( name, Identifier, System.StringComparison.OrdinalIgnoreCase );
+		return string.Equals( name, Identifier, StringComparison.OrdinalIgnoreCase );
 	}
 
-	public class InputAttribute : System.Attribute
+	public class InputAttribute : Attribute
 	{
 
 	}
 
-	public class OutputAttribute : System.Attribute
+	public class OutputAttribute : Attribute
 	{
 
 	}
 
-	public class ConstantAttribute : System.Attribute
+	public class ConstantAttribute : Attribute
 	{
 
 	}

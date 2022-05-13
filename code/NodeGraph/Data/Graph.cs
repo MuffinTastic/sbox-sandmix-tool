@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using System.Linq;
 
-namespace SandMixTool.NodeGraph;
+namespace SandMixTool.NodeGraph.Data;
 
 public class Graph
 {
@@ -40,5 +40,14 @@ public class Graph
 	public void Disconnect( string from, string to )
 	{
 		Connections.Remove( (from, to) );
+	}
+
+	public List<(string, string)> FindFrom( string from )
+	{
+		return Connections.Where( ( c ) => c.Item1 == from ).ToList();
+	}
+	public List<(string, string)> FindTo( string to )
+	{
+		return Connections.Where( ( c ) => c.Item2 == to ).ToList();
 	}
 }

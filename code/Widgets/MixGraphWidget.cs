@@ -1,16 +1,17 @@
 ﻿using SandMixTool.NodeGraph;
-using SandMixTool.Nodes.Audio;
-using SandMixTool.Nodes.Operations;
 using System;
+using System.IO;
 using Tools;
 
 namespace SandMixTool.Widgets;
 
 public class MixGraphWidget : DockWidget
 {
-	internal GraphView GraphView => Widget as GraphView;
-	
 	private MainWindow MainWindow => Parent as MainWindow;
+
+	internal GraphView GraphView => Widget as GraphView;
+	public string Path { get; set; }
+	
 
 	public MixGraphWidget( string title, Widget parent = null ) : base( title, "account_tree", parent )
 	{
@@ -28,6 +29,16 @@ public class MixGraphWidget : DockWidget
 		GraphView.AddNodeType<FloatAddNode>( true );
 		GraphView.AddNodeType<FloatSubNode>( true );
 		GraphView.AddNodeType<Vec3AddNode>( true );
+	}
+
+	public async void WriteToDisk()
+	{
+		if ( string.IsNullOrEmpty( Path ) )
+			return;
+
+		var data = GraphView.Graph.Serialize();
+		
+		await File.WriteAllTextAsync( Path, data );
 	}
 
 	protected override void OnMousePress( MouseEvent e )

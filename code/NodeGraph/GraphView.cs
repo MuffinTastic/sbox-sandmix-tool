@@ -1,4 +1,6 @@
 ﻿using Sandbox;
+using SandMix;
+using SandMix.Nodes;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -46,7 +48,7 @@ public class GraphView : GraphicsView
 		SetHandleConfig( typeof( float ), new HandleConfig { Color = Color.Parse( "#be9363" ).Value, Icon = "f", Name = "Float" } );
 		SetHandleConfig( typeof( Vector3 ), new HandleConfig { Color = Color.Parse( "#fff08a" ).Value, Icon = "v", Name = "Vector3" } );
 		SetHandleConfig( typeof( bool ), new HandleConfig { Color = Color.Parse( "#b49dc9" ).Value, Icon = "b", Name = "Boolean" } );
-		SetHandleConfig( typeof( Types.Audio ), new HandleConfig { Color = Color.Parse( "#9dc2d5" ).Value, Icon = "a", Name = "Audio" } );
+		SetHandleConfig( typeof( SandMix.Types.Audio ), new HandleConfig { Color = Color.Parse( "#9dc2d5" ).Value, Icon = "a", Name = "Audio" } );
 
 		Graph = new Graph();
 	}
@@ -330,19 +332,6 @@ public class GraphView : GraphicsView
 
 			CreateConnection( o, i );
 		}
-	}
-
-	public async void SaveGraph( string path )
-	{
-		JsonSerializerOptions options = new() {
-			IncludeFields = true,
-			WriteIndented = true
-		};
-		options.Converters.Add( new BaseNodeConverter( AvailableNodes ) );
-
-		var json = JsonSerializer.Serialize( Graph, typeof( Graph ), options );
-
-		await File.WriteAllTextAsync( path, json );
 	}
 
 	public void SetHandleConfig( System.Type t, HandleConfig config )

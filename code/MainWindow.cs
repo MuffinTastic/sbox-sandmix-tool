@@ -33,6 +33,7 @@ public class MainWindow : Window
 		var file = MenuBar.AddMenu( "File" );
 		file.AddOption( "Open" );
 		file.AddOption( "Save" ).Triggered += () => SaveMixGraph();
+		file.AddOption( "Save As" ).Triggered += () => SaveMixGraphAs();
 		file.AddOption( "Quit" ).Triggered += () => Close();
 
 		var view = MenuBar.AddMenu( "View" );
@@ -82,9 +83,14 @@ public class MainWindow : Window
 		MixGraphs.Remove( mixGraph );
 	}
 
-	public void SaveMixGraph()
+	public async void SaveMixGraph( )
 	{
-		if ( CurrentMixGraph is null )
+
+	}
+
+	public async void SaveMixGraphAs( MixGraphWidget mixGraph )
+	{
+		if ( mixGraph is null )
 			return;
 
 		var fd = new FileDialog( CurrentMixGraph );
@@ -95,7 +101,7 @@ public class MainWindow : Window
 
 		if ( fd.Execute() )
 		{
-			CurrentMixGraph.GraphView.SaveGraph( fd.SelectedFile );
+			await mixGraph.WriteToDisk
 		}
 	}
 

@@ -1,0 +1,3 @@
+[submodule "code/SandMix"]
+	path = code/SandMix
+	url = git@github.com:MuffinTastic/sbox-sandmix.git

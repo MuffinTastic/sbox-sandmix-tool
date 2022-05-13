@@ -9,6 +9,8 @@ namespace SandMixTool.Widgets;
 public class MixGraphWidget : DockWidget
 {
 	internal GraphView GraphView => Widget as GraphView;
+	
+	private MainWindow MainWindow => Parent as MainWindow;
 
 	public MixGraphWidget( string title, Widget parent = null ) : base( title, "account_tree", parent )
 	{
@@ -32,7 +34,13 @@ public class MixGraphWidget : DockWidget
 	{
 		base.OnMousePress( e );
 
-		var mainWindow = Parent as MainWindow;
-		mainWindow.MixGraphFocus( this );
+		MainWindow.MixGraphFocus( this );
+	}
+
+	public override void OnDestroyed()
+	{
+		base.OnDestroyed();
+
+		MainWindow.MixGraphClose( this );
 	}
 }

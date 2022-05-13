@@ -2,6 +2,7 @@
 using SandMixTool.NodeGraph;
 using SandMixTool.Widgets;
 using System;
+using System.Collections.Generic;
 using System.Text.Json;
 using Tools;
 
@@ -11,10 +12,12 @@ namespace SandMixTool;
 public class MainWindow : Window
 {
 	public Action<MixGraphWidget> MixGraphFocus;
+	public Action<MixGraphWidget> MixGraphClose;
 
 	private PreviewWidget Preview;
 	private InspectorWidget Inspector;
 	private MixGraphWidget CurrentMixGraph;
+	private List<MixGraphWidget> MixGraphs = new();
 
 	public MainWindow()
 	{
@@ -46,7 +49,8 @@ public class MainWindow : Window
 
 		BuildMenu();
 
-		MixGraphFocus += SetGraphView;
+		MixGraphFocus += OnMixGraphFocus;
+		MixGraphClose += OnMixGraphClose;
 
 		Preview = new PreviewWidget( null, this );
 		Dock( Preview, DockArea.Right );
@@ -64,12 +68,18 @@ public class MainWindow : Window
 		Dock( mg, DockArea.Left, CurrentMixGraph );
 
 		mg.GraphView.NodeSelect += Inspector.StartInspecting;
+		MixGraphs.Add( mg );
 	}
 
-	public void SetGraphView( MixGraphWidget graphView )
+	public void OnMixGraphFocus( MixGraphWidget mixGraph )
 	{
 		CurrentMixGraph?.GraphView.UnfocusAllNodes();
-		CurrentMixGraph = graphView;
+		CurrentMixGraph = mixGraph;
+	}
+
+	public void OnMixGraphClose( MixGraphWidget mixGraph )
+	{
+		MixGraphs.Remove( mixGraph );
 	}
 
 	public void SaveMixGraph()
@@ -77,7 +87,7 @@ public class MainWindow : Window
 		if ( CurrentMixGraph is null )
 			return;
 
-		var fd = new FileDialog( this );
+		var fd = new FileDialog( CurrentMixGraph );
 
 		fd.Title = "Save as...";
 		fd.SetNameFilter( SandMixTool.FileFilter );

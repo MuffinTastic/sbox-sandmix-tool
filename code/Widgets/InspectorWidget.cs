@@ -11,8 +11,6 @@ namespace SandMixTool.Widgets;
 
 public class InspectorWidget : DockWidget
 {
-	public const string Icon = "manage_search";
-
 	Widget Editor;
 	InspectorHeader Header;
 	NodeUI CurrentNodeUI;
@@ -20,7 +18,7 @@ public class InspectorWidget : DockWidget
 	public string CurrentTime => System.DateTime.Now.ToString();
 
 
-	public InspectorWidget( Widget parent = null ) : base( "Inspector", Icon, parent )
+	public InspectorWidget( Widget parent = null ) : base( "Inspector", "manage_search", parent )
 	{
 		Widget = new Widget( this );
 

@@ -313,17 +313,17 @@ public class GraphView : GraphicsView
 
 		foreach ( var connection in _graph.Connections )
 		{
-			var o = FindPlugOut( connection.Item2 );
+			var o = FindPlugOut( connection.Item1 );
 			if ( o == null )
 			{
-				Log.Warning( $"Couldn't find output {connection.Item2}" );
+				Log.Warning( $"Couldn't find output {connection.Item1}" );
 				continue;
 			}
 
-			var i = FindPlugIn( connection.Item1 );
+			var i = FindPlugIn( connection.Item2 );
 			if ( i == null )
 			{
-				Log.Warning( $"Couldn't find output {connection.Item1}" );
+				Log.Warning( $"Couldn't find input {connection.Item2}" );
 				continue;
 			}
 

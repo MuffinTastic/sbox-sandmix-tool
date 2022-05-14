@@ -1,20 +1,38 @@
-﻿using SandMixTool.NodeGraph;
+﻿using SandMix;
+using SandMix.Nodes.Audio;
+using SandMix.Nodes.Maths;
+using SandMixTool.Dialogs;
+using SandMixTool.NodeGraph;
 using System;
 using System.IO;
+using System.Threading.Tasks;
 using Tools;
 
 namespace SandMixTool.Widgets;
 
 public class MixGraphWidget : DockWidget
 {
+	public const string DefaultTitle = "New Mix Graph";
+	public static int NewGraphNumber = 0;
+
+	public MixGraphWidget LastOpened { get; private set; }
+
 	private MainWindow MainWindow => Parent as MainWindow;
 
 	internal GraphView GraphView => Widget as GraphView;
-	public string Path { get; set; }
-	
+	public string FilePath { get; private set; }
 
-	public MixGraphWidget( string title, Widget parent = null ) : base( title, "account_tree", parent )
+	public bool Changed { get; private set; } = false;
+	public bool AttemptSave { get; private set; } = true;
+	public string UnchangedTitle { get; private set; } = DefaultTitle;
+
+	public event Action<MixGraphWidget> MixGraphFocus;
+
+	public MixGraphWidget( Widget parent = null ) : base( DefaultTitle, "account_tree", parent )
 	{
+		NewGraphNumber++;
+
+		DeleteOnClose = true;
 
 		CreateUI();
 	}
@@ -29,29 +47,132 @@ public class MixGraphWidget : DockWidget
 		GraphView.AddNodeType<FloatAddNode>( true );
 		GraphView.AddNodeType<FloatSubNode>( true );
 		GraphView.AddNodeType<Vec3AddNode>( true );
+
+		GraphView.GraphUpdated += () => {
+			Changed = true;
+			UpdateTitle();
+		};
+
+		GraphView.NodeSelect += ( _, _ ) => MixGraphFocus( this );
+		GraphView.OnSelectionChanged += () => MixGraphFocus( this );
+
+		UpdateTitle();
 	}
 
-	public async void WriteToDisk()
+	private void UpdateTitle()
 	{
-		if ( string.IsNullOrEmpty( Path ) )
+		var title = $"{DefaultTitle} {NewGraphNumber}";
+
+		if ( !string.IsNullOrEmpty( FilePath ) )
+		{
+			title = Path.GetFileName( FilePath );
+		}
+
+		UnchangedTitle = title;
+
+		if ( Changed )
+			title += "*";
+
+		Title = title;
+	}
+
+	public void SetFilePath( string filePath )
+	{
+		FilePath = filePath;
+
+		if ( string.IsNullOrEmpty( Path.GetExtension( filePath ) ) )
+		{
+			FilePath += $".{SandMixTool.FileExtension}";
+		}
+	}
+
+	public void Save()
+	{
+		if ( string.IsNullOrEmpty( FilePath ) )
+		{
+			SaveAs();
+			return;
+		}
+
+		WriteToDisk();
+	}
+
+	public void SaveAs()
+	{
+		var fd = new FileDialog( this );
+
+		fd.Title = $"Save {UnchangedTitle} as...";
+		fd.SetNameFilter( SandMixTool.FileFilter );
+		fd.SetFindFile();
+
+		if ( fd.Execute() )
+		{
+			SetFilePath( fd.SelectedFile );
+			WriteToDisk();
+		}
+	}
+
+	public void DontAttemptSave()
+	{
+		AttemptSave = false;
+	}
+
+	public void ReadFromDisk( string filePath )
+	{
+		FilePath = filePath;
+
+		var json = File.ReadAllText( FilePath );
+		var graph = Graph.Deserialize( json );
+		GraphView.Graph = graph;
+
+		Changed = false;
+		UpdateTitle();
+	}
+
+	public void WriteToDisk()
+	{
+		if ( string.IsNullOrEmpty( FilePath ) )
 			return;
 
 		var data = GraphView.Graph.Serialize();
 		
-		await File.WriteAllTextAsync( Path, data );
+		File.WriteAllText( FilePath, data );
+
+		Changed = false;
+		UpdateTitle();
 	}
 
-	protected override void OnMousePress( MouseEvent e )
+	protected override void OnVisibilityChanged( bool visible )
 	{
-		base.OnMousePress( e );
+		if ( visible )
+			return;
 
-		MainWindow.MixGraphFocus( this );
-	}
+		if ( !Changed || !AttemptSave )
+		{
+			//Destroy();
+			return;
+		}
 
-	public override void OnDestroyed()
-	{
-		base.OnDestroyed();
+		var prompt = new SaveDialog( new[] { this } );
+		prompt.Triggered += ( result ) =>
+		{
+			switch ( result )
+			{
+				case SaveDialog.Result.Yes:
+					Save();
+					Destroy(); // destroy since close isn't a thing
+					break;
+				case SaveDialog.Result.No:
+					DontAttemptSave();
+					Destroy(); // we don't care about the changes, kill it
+					break;
+				case SaveDialog.Result.Cancel:
+					break;
+			}
+		};
 
-		MainWindow.MixGraphClose( this );
+		prompt.Show();
+
+		Show();
 	}
 }

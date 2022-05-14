@@ -2,24 +2,26 @@
 using System.Collections.Generic;
 using System.Linq;
 using Sandbox;
+using SandMix.Nodes;
+
+using SandMixTool.Inspector;
 using SandMixTool.NodeGraph;
 
 namespace SandMixTool.Widgets;
 
 public class InspectorWidget : DockWidget
 {
-	GraphView CurrentGraphView;
+	public const string Icon = "manage_search";
+
 	Widget Editor;
 	InspectorHeader Header;
+	NodeUI CurrentNodeUI;
 
 	public string CurrentTime => System.DateTime.Now.ToString();
 
 
-	public InspectorWidget( Widget parent = null ) : base( "Inspector", "manage_search", parent )
+	public InspectorWidget( Widget parent = null ) : base( "Inspector", Icon, parent )
 	{
-		//MinimumSize = new Vector2( 400, 100 );
-		//Size = new Vector2( 400, 400 );
-
 		Widget = new Widget( this );
 
 		Widget.SetLayout( LayoutMode.TopToBottom );
@@ -33,22 +35,27 @@ public class InspectorWidget : DockWidget
 
 		Widget.Layout.Add( Editor, -1 );
 
-		//Utility.OnInspect += StartInspecting;
-
-		// Debug - start inspecting self
 		StartInspecting( null );
 	}
 
-	public void StartInspecting( BaseNode node )
+	public override void ChildValuesChanged( Widget source )
 	{
-		StartInspecting( node, true );
+		CurrentNodeUI.Graph.CallGraphUpdated();
 	}
 
-	public void StartInspecting( BaseNode node, bool addToHistory = true )
+	public void StartInspecting( NodeUI nodeUI )
+	{
+		StartInspecting( nodeUI, true );
+	}
+
+	public void StartInspecting( NodeUI nodeUI, bool addToHistory = true )
 	{
 		using var sx = new SuspendUpdates( this );
 
 		Editor.DestroyChildren();
+
+		CurrentNodeUI = nodeUI;
+		var node = nodeUI?.Node;
 
 		var customeditor = CanEditAttribute.CreateEditorForObject( node );
 		if ( customeditor != null )
@@ -73,10 +80,10 @@ public class InspectorWidget : DockWidget
 			while ( ObjectHistory.Count > HistoryPlace + 1 )
 				ObjectHistory.RemoveAt( ObjectHistory.Count - 1 );
 
-			if ( ObjectHistory.ElementAtOrDefault( HistoryPlace ) != node )
+			if ( ObjectHistory.ElementAtOrDefault( HistoryPlace ) != nodeUI )
 			{
 				// Add to history
-				ObjectHistory.Add( node );
+				ObjectHistory.Add( nodeUI );
 				HistoryPlace = ObjectHistory.Count - 1;
 
 				// limit history size
@@ -145,7 +152,7 @@ public class InspectorWidget : DockWidget
 	}
 
 	public int HistoryPlace = 0;
-	public List<NodeGraph.BaseNode> ObjectHistory = new();
+	public List<NodeUI> ObjectHistory = new();
 }
 
 public class InspectorHeader : ToolBar

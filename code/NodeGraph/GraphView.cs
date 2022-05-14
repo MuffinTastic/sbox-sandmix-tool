@@ -30,7 +30,8 @@ public class GraphView : GraphicsView
 	List<NodeUI> Nodes = new();
 	List<Connection> Connections = new();
 
-	public Action<BaseNode, bool> NodeSelect;
+	public event Action<NodeUI, bool> NodeSelect;
+	public event Action GraphUpdated;
 
 	public GraphView( Widget parent ) : base( parent )
 	{
@@ -57,7 +58,9 @@ public class GraphView : GraphicsView
 	{
 		base.OnDestroyed();
 
+
 		NodeSelect = null;
+		GraphUpdated = null;
 	}
 
 	protected override void OnWheel( WheelEvent e )
@@ -175,11 +178,13 @@ public class GraphView : GraphicsView
 			var OutputType = nodeOutput.Property.PropertyType;
 			var InputType = DropTarget.Property.PropertyType;
 
-			var connectedCount = Connections.Where( c => c.Input == DropTarget ).Count();
+			var otherConnected = Connections
+				.Where( c => c.Input == DropTarget && c != source )
+				.FirstOrDefault();
 
 			if ( nodeOutput.Node == DropTarget.Node ||	// Same node as was selected before
-				OutputType != InputType ||				// Incompatible type
-				connectedCount != 0 )					// Other nodes are already connected
+				OutputType != InputType ||              // Incompatible type
+				otherConnected is not null )			// Other nodes are already connected
 			{
 				DropTarget = null;
 			}
@@ -206,6 +211,8 @@ public class GraphView : GraphicsView
 
 				source.Disconnect();
 				source.Destroy();
+
+				CallGraphUpdated();
 			}
 
 			if ( DropTarget != null )
@@ -227,18 +234,18 @@ public class GraphView : GraphicsView
 	{
 		base.OnMousePress( e );
 
-		var item = GetItemAt( ToScene( e.LocalPosition ) );
-
 		if ( NodeSelect == null )
-			Log.Info( (Parent as DockWidget).Title );
+			return;
+
+		var item = GetItemAt( ToScene( e.LocalPosition ) );
 
 		if ( item is NodeUI node )
 		{
-			NodeSelect( node.Node, true );
+			NodeSelect( node, true );
 		}
 		else if ( item is Plug plug )
 		{
-			NodeSelect( plug.Node.Node, true );
+			NodeSelect( plug.Node, true );
 		}
 		else
 		{
@@ -254,6 +261,26 @@ public class GraphView : GraphicsView
 		}
 	}
 
+	private void CreateNode( NodeUI node )
+	{
+		Nodes.Add( node );
+		Add( node );
+		Graph?.Add( node.Node );
+		Log.Info( $"Created {node.Node.GetType().Name} node {node.Node.Identifier}" );
+
+		CallGraphUpdated();
+	}
+
+	private void RemoveNode( NodeUI node )
+	{
+		Nodes.Remove( node );
+		Graph?.Remove( node.Node );
+		node.Destroy();
+		Log.Info( $"Removed {node.Node.GetType().Name} node {node.Node.Identifier}" );
+
+		CallGraphUpdated();
+	}
+
 	private void CreateConnection( PlugOut nodeOutput, PlugIn dropTarget )
 	{
 		System.ArgumentNullException.ThrowIfNull( nodeOutput );
@@ -266,22 +293,8 @@ public class GraphView : GraphicsView
 		Connections.Add( connection );
 		Log.Info( $"Created connection {nodeOutput.Identifier} → {dropTarget.Identifier}" );
 		Graph?.Connect( nodeOutput.Identifier, dropTarget.Identifier );
-	}
 
-	private void CreateNode( NodeUI node )
-	{
-		Nodes.Add( node );
-		Add( node );
-		Graph?.Add( node.Node );
-		Log.Info( $"Created {node.Node.GetType().Name} node {node.Node.Identifier}" );
-	}
-
-	private void RemoveNode( NodeUI node )
-	{
-		Nodes.Remove( node );
-		Graph?.Remove( node.Node );
-		node.Destroy();
-		Log.Info( $"Removed {node.Node.GetType().Name} node {node.Node.Identifier}" );
+		CallGraphUpdated();
 	}
 
 	internal void RemoveConnection( Connection c )
@@ -289,6 +302,8 @@ public class GraphView : GraphicsView
 		Connections.Remove( c );
 		Log.Info( $"Removed connection {c.Output.Identifier} → {c.Input.Identifier}" );
 		Graph?.Disconnect( c.Output.Identifier, c.Input.Identifier );
+
+		CallGraphUpdated();
 	}
 
 	internal void NodePositionChanged( NodeUI node )
@@ -300,6 +315,13 @@ public class GraphView : GraphicsView
 
 			connection.Layout();
 		}
+
+		CallGraphUpdated();
+	}
+
+	public void CallGraphUpdated()
+	{
+		GraphUpdated();
 	}
 
 	void RebuildFromGraph()

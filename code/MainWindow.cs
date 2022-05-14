@@ -1,8 +1,11 @@
 ﻿using Sandbox;
+using SandMix.Nodes;
+using SandMixTool.Dialogs;
 using SandMixTool.NodeGraph;
 using SandMixTool.Widgets;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
 using Tools;
 
@@ -11,13 +14,14 @@ namespace SandMixTool;
 [Tool( SandMixTool.ProjectName, "surround_sound", SandMixTool.ProjectTagline )]
 public class MainWindow : Window
 {
-	public Action<MixGraphWidget> MixGraphFocus;
-	public Action<MixGraphWidget> MixGraphClose;
+	public static MainWindow Instance { get; private set; }
 
-	private PreviewWidget Preview;
 	private InspectorWidget Inspector;
+	private PreviewWidget Preview;
+
 	private MixGraphWidget CurrentMixGraph;
-	private List<MixGraphWidget> MixGraphs = new();
+
+	private DockWidget NewFileHandle;
 
 	public MainWindow()
 	{
@@ -31,83 +35,157 @@ public class MainWindow : Window
 	public void BuildMenu()
 	{
 		var file = MenuBar.AddMenu( "File" );
-		file.AddOption( "Open" );
-		file.AddOption( "Save" ).Triggered += () => SaveMixGraph();
-		file.AddOption( "Save As" ).Triggered += () => SaveMixGraphAs();
-		file.AddOption( "Quit" ).Triggered += () => Close();
+		{
+			var newMix = file.AddOption( "New" );
+			newMix.Triggered += () => CreateMixGraph();
+			newMix.Shortcut = "Ctrl+N";
+
+			var openMix = file.AddOption( "Open" );
+			openMix.Triggered += () => OpenMixGraph();
+			openMix.Shortcut = "Ctrl+O";
+
+			var saveMix = file.AddOption( "Save" );
+			saveMix.Triggered += () => CurrentMixGraph.Save();
+			saveMix.Shortcut = "Ctrl+S";
+
+			file.AddOption( "Save As" ).Triggered += () => CurrentMixGraph.SaveAs();
+			file.AddOption( "Quit" ).Triggered += () => Close();
+		}
 
 		var view = MenuBar.AddMenu( "View" );
+		view.AddOption( Preview.GetToggleViewOption() );
+		view.AddOption( Inspector.GetToggleViewOption() );
 
 		var help = MenuBar.AddMenu( "Help" );
-		help.AddOption( "Documentation" );
-		help.AddSeparator();
-		help.AddOption( "About" ).Triggered += () => new Dialogs.AboutDialog( this ).Show();
+		{
+			help.AddOption( "Documentation" );
+			help.AddSeparator();
+			help.AddOption( "About" ).Triggered += () => new Dialogs.AboutDialog( this ).Show();
+		}
 	}
 
 	public void CreateUI()
 	{
-		Clear();
+		//Clear();
+		CurrentMixGraph = null;
+		Instance = this;
+
+		NewFileHandle = new DockWidget( "", null, this );
+		Dock( NewFileHandle, DockArea.Left );
+		NewFileHandle.Hide();
+
+		Preview = new PreviewWidget( null, this );
+		Preview.MinimumSize = (Vector2) 300.0f;
+		Dock( Preview, DockArea.Right );
+		Preview.Show();
+
+		Inspector = new InspectorWidget( this );
+		Inspector.MinimumSize = (Vector2) 300.0f;
+		Dock( Inspector, DockArea.Right );
+		Inspector.Show();
 
 		BuildMenu();
 
-		MixGraphFocus += OnMixGraphFocus;
-		MixGraphClose += OnMixGraphClose;
-
-		Preview = new PreviewWidget( null, this );
-		Dock( Preview, DockArea.Right );
-
-		Inspector = new InspectorWidget( this );
-		Dock( Inspector, DockArea.Right );
-
-		CreateMixGraph();
 		CreateMixGraph();
 	}
 
-	public void CreateMixGraph()
+	public MixGraphWidget CreateMixGraph()
 	{
-		var mg = new MixGraphWidget( "Mix Graph", this );
-		Dock( mg, DockArea.Left, CurrentMixGraph );
+		var mixGraph = new MixGraphWidget( this );
+		mixGraph.MixGraphFocus += OnMixGraphFocus;
 
-		mg.GraphView.NodeSelect += Inspector.StartInspecting;
-		MixGraphs.Add( mg );
+		if ( Inspector is not null )
+			mixGraph.GraphView.NodeSelect += Inspector.StartInspecting;
+		else
+			Log.Warning( "Inspector was null" );
+
+		//var lastOpened = Children.OfType<MixGraphWidget>().Where( mg => mg != mixGraph ).LastOrDefault();
+
+		//if ( lastOpened is not null )
+			DockInTab( NewFileHandle, mixGraph );
+		//else
+		//	Dock( mixGraph, DockArea.Left, null );
+
+		mixGraph.Show();
+		mixGraph.Raise();
+
+		CurrentMixGraph = mixGraph;
+
+		return mixGraph;
+	}
+
+	public void OpenMixGraph()
+	{
+
+		Raise();
+		var fd = new FileDialog( this );
+
+		fd.Title = $"Open mix graph...";
+		fd.SetNameFilter( SandMixTool.FileFilter );
+		fd.SetFindExistingFile();
+
+		if ( fd.Execute() )
+		{
+			var openMixGraph = Children.OfType<MixGraphWidget>().Where( mg => mg.FilePath == fd.SelectedFile ).FirstOrDefault();
+
+			if ( openMixGraph is not null )
+			{
+				openMixGraph.Raise();
+				return;
+			}
+
+			var mixGraph = CurrentMixGraph;
+
+			if ( mixGraph is null || mixGraph.Changed || !string.IsNullOrEmpty( mixGraph.FilePath ) )
+				mixGraph = CreateMixGraph();
+
+			mixGraph.ReadFromDisk( fd.SelectedFile );
+		}
+	}
+
+	public override void OnClose( CloseEvent e )
+	{
+		var unsavedMixGraphs = Children.OfType<MixGraphWidget>().Where( mg => mg.Changed && mg.AttemptSave );
+
+		if ( unsavedMixGraphs.Count() == 0 )
+		{
+			e.Accept();
+			return;
+		}
+
+		var closeConfirm = new SaveDialog( unsavedMixGraphs, this );
+		closeConfirm.Triggered += ( result ) =>
+		{
+			if ( result == SaveDialog.Result.Cancel )
+				return;
+
+			foreach ( var mixGraph in unsavedMixGraphs )
+			{
+				switch ( result )
+				{
+					case SaveDialog.Result.Yes:
+						mixGraph.Save();
+						break;
+					case SaveDialog.Result.No:
+						mixGraph.DontAttemptSave();
+						break;
+				}
+			}
+
+			Close();
+		};
+
+		e.Ignore();
 	}
 
 	public void OnMixGraphFocus( MixGraphWidget mixGraph )
 	{
-		CurrentMixGraph?.GraphView.UnfocusAllNodes();
 		CurrentMixGraph = mixGraph;
-	}
 
-	public void OnMixGraphClose( MixGraphWidget mixGraph )
-	{
-		MixGraphs.Remove( mixGraph );
-	}
-
-	public async void SaveMixGraph( )
-	{
-
-	}
-
-	public async void SaveMixGraphAs( MixGraphWidget mixGraph )
-	{
-		if ( mixGraph is null )
-			return;
-
-		var fd = new FileDialog( CurrentMixGraph );
-
-		fd.Title = "Save as...";
-		fd.SetNameFilter( SandMixTool.FileFilter );
-		fd.SetFindFile();
-
-		if ( fd.Execute() )
+		var otherMixGraphs = Children.OfType<MixGraphWidget>().Where( mg => mg != mixGraph);
+		foreach ( var otherMixGraph in otherMixGraphs )
 		{
-			await mixGraph.WriteToDisk
+			otherMixGraph.GraphView.UnfocusAllNodes();
 		}
-	}
-
-	[Sandbox.Event.Hotload]
-	public void OnHotload()
-	{
-		CreateUI();
 	}
 }

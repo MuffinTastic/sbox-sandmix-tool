@@ -2,6 +2,8 @@
 using System.Reflection;
 using Tools;
 
+namespace SandMixTool.Inspector;
+
 public class PropertyRow : Widget
 {
 	DisplayInfo Info;

@@ -1,6 +1,8 @@
 ﻿using Tools;
 using Sandbox;
 
+namespace SandMixTool.Inspector;
+
 public class SheetHeader : Widget
 {
 	PropertySheet Sheet { get; init; }

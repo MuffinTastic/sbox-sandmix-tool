@@ -5,6 +5,8 @@ using System.Linq;
 using System.Reflection;
 using Tools;
 
+namespace SandMixTool.Inspector;
+
 public class PropertySheet : Widget
 {
 	object _target;

@@ -1,5 +1,7 @@
 ﻿using Tools;
 
+namespace SandMixTool.Inspector;
+
 public class ExpandGroup : Widget
 {
 	Widget widget;

@@ -1,5 +1,7 @@
 ﻿using Sandbox;
 
+namespace SandMixTool.Inspector;
+
 public interface IPropertyInspector
 {
 	public bool IsFullWidth => false;

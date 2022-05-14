@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using Tools;
+﻿using Tools;
 
 namespace SandMixTool.Dialogs;
 
@@ -55,7 +54,7 @@ public class AboutDialog : Dialog
 
 		var repoButton = new Button( this );
 		repoButton.Text = "Visit repo";
-		repoButton.Clicked += () => Process.Start( "explorer", SandMixTool.ProjectRepoURL );
+		repoButton.Clicked += () => Utility.OpenFolder( SandMixTool.ProjectRepoURL );
 		repoButton.ToolTip = SandMixTool.ProjectRepoURL;
 		Layout.Add( repoButton );
 	}

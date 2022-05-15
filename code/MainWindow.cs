@@ -20,6 +20,7 @@ public class MainWindow : Window
 	private PreviewWidget Preview;
 
 	private MixGraphWidget CurrentMixGraph;
+	private List<MixGraphWidget> MixGraphs = new();
 
 	private DockWidget NewFileHandle;
 
@@ -93,6 +94,7 @@ public class MainWindow : Window
 	{
 		var mixGraph = new MixGraphWidget( this );
 		mixGraph.MixGraphFocus += OnMixGraphFocus;
+		mixGraph.MixGraphClose += OnMixGraphClose;
 
 		if ( Inspector is not null )
 			mixGraph.GraphView.NodeSelect += Inspector.StartInspecting;
@@ -110,6 +112,7 @@ public class MainWindow : Window
 		mixGraph.Raise();
 
 		CurrentMixGraph = mixGraph;
+		MixGraphs.Add( mixGraph );
 
 		return mixGraph;
 	}
@@ -126,7 +129,7 @@ public class MainWindow : Window
 
 		if ( fd.Execute() )
 		{
-			var openMixGraph = Children.OfType<MixGraphWidget>().Where( mg => mg.FilePath == fd.SelectedFile ).FirstOrDefault();
+			var openMixGraph = MixGraphs.Where( mg => mg.FilePath == fd.SelectedFile ).FirstOrDefault();
 
 			if ( openMixGraph is not null )
 			{
@@ -145,7 +148,7 @@ public class MainWindow : Window
 
 	public override void OnClose( CloseEvent e )
 	{
-		var unsavedMixGraphs = Children.OfType<MixGraphWidget>().Where( mg => mg.Changed && mg.AttemptSave );
+		var unsavedMixGraphs = MixGraphs.Where( mg => mg.Changed && mg.AttemptSave );
 
 		if ( unsavedMixGraphs.Count() == 0 )
 		{
@@ -182,10 +185,15 @@ public class MainWindow : Window
 	{
 		CurrentMixGraph = mixGraph;
 
-		var otherMixGraphs = Children.OfType<MixGraphWidget>().Where( mg => mg != mixGraph);
+		var otherMixGraphs = MixGraphs.Where( mg => mg != mixGraph );
 		foreach ( var otherMixGraph in otherMixGraphs )
 		{
 			otherMixGraph.GraphView.UnfocusAllNodes();
 		}
+	}
+
+	public void OnMixGraphClose( MixGraphWidget mixGraph )
+	{
+		MixGraphs.Remove( mixGraph );
 	}
 }

@@ -30,6 +30,7 @@ public class MixGraphWidget : DockWidget
 	public string UnchangedTitle { get; private set; } = DefaultTitle;
 
 	public event Action<MixGraphWidget> MixGraphFocus;
+	public event Action<MixGraphWidget> MixGraphClose;
 
 	public MixGraphWidget( Widget parent = null ) : base( DefaultTitle, "account_tree", parent )
 	{
@@ -177,5 +178,12 @@ public class MixGraphWidget : DockWidget
 		prompt.Show();
 
 		Show();
+	}
+
+	public override void OnDestroyed()
+	{
+		base.OnDestroyed();
+
+		MixGraphClose( this );
 	}
 }

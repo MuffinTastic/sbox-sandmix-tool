@@ -120,7 +120,7 @@ public class MainWindow : Window
 		Raise();
 		var fd = new FileDialog( this );
 
-		fd.Title = $"Open mix graph...";
+		fd.Title = $"Open";
 		fd.SetNameFilter( SandMixTool.FileFilter );
 		fd.SetFindExistingFile();
 

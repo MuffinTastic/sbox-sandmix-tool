@@ -101,7 +101,7 @@ public class MixGraphWidget : DockWidget
 	{
 		var fd = new FileDialog( this );
 
-		fd.Title = $"Save {UnchangedTitle} as...";
+		fd.Title = $"Save As";
 		fd.SetNameFilter( SandMixTool.FileFilter );
 		fd.SetFindFile();
 

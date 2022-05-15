@@ -46,10 +46,10 @@ public class MainWindow : Window
 			openMix.Shortcut = "Ctrl+O";
 
 			var saveMix = file.AddOption( "Save" );
-			saveMix.Triggered += () => CurrentMixGraph.Save();
+			saveMix.Triggered += () => CurrentMixGraph?.Save();
 			saveMix.Shortcut = "Ctrl+S";
 
-			file.AddOption( "Save As" ).Triggered += () => CurrentMixGraph.SaveAs();
+			file.AddOption( "Save As" ).Triggered += () => CurrentMixGraph?.SaveAs();
 			file.AddOption( "Quit" ).Triggered += () => Close();
 		}
 

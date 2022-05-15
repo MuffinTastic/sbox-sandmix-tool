@@ -203,7 +203,7 @@ public class GraphView : GraphicsView
 
 		NodeSelect( node, node is not null );
 
-		if ( node is null && e.LeftMouseButton )
+		if ( item is null && e.LeftMouseButton )
 		{
 			dragStart = ToScene( e.LocalPosition );
 			SelectionBox = new Selection( this );
@@ -238,7 +238,6 @@ public class GraphView : GraphicsView
 
 			e.Accepted = true;
 		}
-
 	}
 
 	internal PlugIn DropTarget { get; set; }

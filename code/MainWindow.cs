@@ -24,6 +24,16 @@ public class MainWindow : Window
 
 	private DockWidget NewFileHandle;
 
+	private Option GraphSaveOption;
+	private Option GraphSaveAsOption;
+
+	private Option GraphUndoOption;
+	private Option GraphRedoOption;
+	private Option GraphCutOption;
+	private Option GraphCopyOption;
+	private Option GraphPasteOption;
+	private Option GraphDeleteOption;
+
 	public MainWindow()
 	{
 		Title = SandMixTool.ProjectName;
@@ -35,6 +45,8 @@ public class MainWindow : Window
 
 	public void BuildMenu()
 	{
+		MenuBar.Clear();
+
 		var file = MenuBar.AddMenu( "File" );
 		{
 			var newMix = file.AddOption( "New" );
@@ -45,17 +57,54 @@ public class MainWindow : Window
 			openMix.Triggered += () => OpenMixGraph();
 			openMix.Shortcut = "Ctrl+O";
 
-			var saveMix = file.AddOption( "Save" );
-			saveMix.Triggered += () => CurrentMixGraph?.Save();
-			saveMix.Shortcut = "Ctrl+S";
+			file.AddSeparator();
 
-			file.AddOption( "Save As" ).Triggered += () => CurrentMixGraph?.SaveAs();
+			GraphSaveOption = new Option( title: "Save", icon: null, action: () => CurrentMixGraph?.Save() );
+			GraphSaveOption.Shortcut = "Ctrl+S";
+			file.AddOption( GraphSaveOption );
+
+			GraphSaveAsOption = new Option( title: "Save As", icon: null, action: () => CurrentMixGraph?.SaveAs() );
+			file.AddOption( GraphSaveAsOption );
+
+			file.AddSeparator();
+
 			file.AddOption( "Quit" ).Triggered += () => Close();
 		}
 
+		var edit = MenuBar.AddMenu( "Edit" );
+		{
+			GraphUndoOption = new Option( title: "Undo", icon: null, action: () => CurrentMixGraph?.GraphUndo() );
+			GraphUndoOption.Shortcut = "Ctrl+Z";
+			edit.AddOption( GraphUndoOption );
+
+			GraphRedoOption = new Option( title: "Redo", icon: null, action: () => CurrentMixGraph?.GraphRedo() );
+			GraphRedoOption.Shortcut = "Ctrl+Y";
+			edit.AddOption( GraphRedoOption );
+
+			edit.AddSeparator();
+
+			GraphCutOption = new Option( title: "Cut", icon: null, action: () => CurrentMixGraph?.GraphCut() );
+			GraphCutOption.Shortcut = "Ctrl+X";
+			edit.AddOption( GraphCutOption );
+
+			GraphCopyOption = new Option( title: "Copy", icon: null, action: () => CurrentMixGraph?.GraphCopy() );
+			GraphCopyOption.Shortcut = "Ctrl+C";
+			edit.AddOption( GraphCopyOption );
+
+			GraphPasteOption = new Option( title: "Paste", icon: null, action: () => CurrentMixGraph?.GraphPaste() );
+			GraphPasteOption.Shortcut = "Ctrl+V";
+			edit.AddOption( GraphPasteOption );
+
+			GraphDeleteOption = new Option( title: "Delete", icon: null, action: () => CurrentMixGraph?.GraphDelete() );
+			GraphDeleteOption.Shortcut = "Del";
+			edit.AddOption( GraphDeleteOption );
+		}
+
 		var view = MenuBar.AddMenu( "View" );
-		view.AddOption( Preview.GetToggleViewOption() );
-		view.AddOption( Inspector.GetToggleViewOption() );
+		{
+			view.AddOption( Preview.GetToggleViewOption() );
+			view.AddOption( Inspector.GetToggleViewOption() );
+		}
 
 		var help = MenuBar.AddMenu( "Help" );
 		{
@@ -63,6 +112,22 @@ public class MainWindow : Window
 			help.AddSeparator();
 			help.AddOption( "About" ).Triggered += () => new Dialogs.AboutDialog( this ).Show();
 		}
+	}
+
+	public void UpdateMenuBar()
+	{
+		var mixGraphFocused = CurrentMixGraph is not null;
+		GraphSaveOption.Enabled = mixGraphFocused;
+		GraphSaveAsOption.Enabled = mixGraphFocused;
+
+		GraphUndoOption.Enabled = CurrentMixGraph?.GraphCanUndo() ?? false;
+		GraphRedoOption.Enabled = CurrentMixGraph?.GraphCanRedo() ?? false;
+
+		var hasSelection = CurrentMixGraph?.GraphHasSelection() ?? false;
+		GraphCutOption.Enabled = hasSelection;
+		GraphCopyOption.Enabled = hasSelection;
+		GraphPasteOption.Enabled = hasSelection;
+		GraphDeleteOption.Enabled = hasSelection;
 	}
 
 	public void CreateUI()
@@ -113,6 +178,8 @@ public class MainWindow : Window
 
 		CurrentMixGraph = mixGraph;
 		MixGraphs.Add( mixGraph );
+
+		UpdateMenuBar();
 
 		return mixGraph;
 	}
@@ -190,10 +257,17 @@ public class MainWindow : Window
 		{
 			otherMixGraph.GraphView.UnfocusAllNodes();
 		}
+
+		UpdateMenuBar();
 	}
 
 	public void OnMixGraphClose( MixGraphWidget mixGraph )
 	{
+		if ( mixGraph == CurrentMixGraph )
+			CurrentMixGraph = null;
+
 		MixGraphs.Remove( mixGraph );
+
+		UpdateMenuBar();
 	}
 }

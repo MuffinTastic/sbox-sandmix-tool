@@ -6,6 +6,7 @@ using SandMix.Nodes.Maths;
 using SandMixTool.Dialogs;
 using SandMixTool.NodeGraph;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -185,5 +186,50 @@ public class MixGraphWidget : DockWidget
 		base.OnDestroyed();
 
 		MixGraphClose( this );
+	}
+
+	public void GraphUndo()
+	{
+		GraphView.OnGraphUndo();
+	}
+
+	public void GraphRedo()
+	{
+		GraphView.OnGraphRedo();
+	}
+
+	public void GraphCut()
+	{
+		GraphView.OnGraphCut();
+	}
+
+	public void GraphCopy()
+	{
+		GraphView.OnGraphCopy();
+	}
+
+	public void GraphPaste()
+	{
+		GraphView.OnGraphPaste();
+	}
+
+	internal void GraphDelete()
+	{
+		GraphView.OnGraphDelete();
+	}
+
+	public bool GraphCanUndo()
+	{
+		return true;
+	}
+
+	public bool GraphCanRedo()
+	{
+		return false;
+	}
+
+	public bool GraphHasSelection()
+	{
+		return GraphView.SelectedItems.Any();
 	}
 }

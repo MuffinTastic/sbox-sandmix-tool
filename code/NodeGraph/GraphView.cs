@@ -223,23 +223,6 @@ public class GraphView : GraphicsView
 		}
 	}
 
-	protected override void OnKeyPress( KeyEvent e )
-	{
-		base.OnKeyPress( e );
-
-		if ( e.Key == KeyCode.Delete )
-		{
-			// Due to the connection drag & drop it's actually impossible
-			// to keep a connection selected, so don't even bother getting them
-			foreach ( var node in SelectedItems.OfType<NodeUI>().ToList() )
-			{
-				RemoveNode( node );
-			}
-
-			e.Accepted = true;
-		}
-	}
-
 	internal PlugIn DropTarget { get; set; }
 
 	Connection Preview;
@@ -452,5 +435,43 @@ public class GraphView : GraphicsView
 		var node = Items.OfType<NodeUI>().FirstOrDefault( x => x.Node.IsNamed( split[0] ) );
 		if ( node == null ) return null;
 		return node.Inputs.FirstOrDefault( x => x.IsNamed( split[1] ) );
+	}
+
+	// Shortcut events
+
+	public void OnGraphUndo()
+	{
+
+	}
+
+	public void OnGraphRedo()
+	{
+
+	}
+
+	public void OnGraphCut()
+	{
+		OnGraphCopy();
+		OnGraphDelete();
+	}
+
+	public void OnGraphCopy()
+	{
+
+	}
+
+	public void OnGraphPaste()
+	{
+
+	}
+
+	public void OnGraphDelete()
+	{
+		// Due to the connection drag & drop it's actually impossible
+		// to keep a connection selected, so don't even bother getting them
+		foreach ( var node in SelectedItems.OfType<NodeUI>().ToList() )
+		{
+			RemoveNode( node );
+		}
 	}
 }

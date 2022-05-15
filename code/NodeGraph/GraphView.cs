@@ -163,7 +163,10 @@ public class GraphView : GraphicsView
 		menu.OpenAt( e.ScreenPosition );
 	}
 
+	Vector2 dragStart;
 	Vector2 lastMousePosition;
+
+	Selection SelectionBox;
 
 	protected override void OnMouseMove( MouseEvent e )
 	{
@@ -181,6 +184,61 @@ public class GraphView : GraphicsView
 
 		e.Accepted = true;
 		lastMousePosition = ToScene( e.LocalPosition );
+
+		if ( SelectionBox is not null )
+		{
+			SelectionBox.UpdateSelection( dragStart, lastMousePosition );
+		}
+	}
+	protected override void OnMousePress( MouseEvent e )
+	{
+		base.OnMousePress( e );
+
+		if ( NodeSelect == null )
+			return;
+
+		var item = GetItemAt( ToScene( e.LocalPosition ) );
+		var node = item as NodeUI;
+		node ??= (item as Plug)?.Node;
+
+		NodeSelect( node, node is not null );
+
+		if ( node is null && e.LeftMouseButton )
+		{
+			dragStart = ToScene( e.LocalPosition );
+			SelectionBox = new Selection( this );
+			SelectionBox.UpdateSelection( dragStart, lastMousePosition );
+			Add( SelectionBox );
+		}
+	}
+
+	protected override void OnMouseReleased( MouseEvent e )
+	{
+		base.OnMouseReleased( e );
+
+		if ( SelectionBox is not null )
+		{
+			SelectionBox.Destroy();
+			SelectionBox = null;
+		}
+	}
+
+	protected override void OnKeyPress( KeyEvent e )
+	{
+		base.OnKeyPress( e );
+
+		if ( e.Key == KeyCode.Delete )
+		{
+			// Due to the connection drag & drop it's actually impossible
+			// to keep a connection selected, so don't even bother getting them
+			foreach ( var node in SelectedItems.OfType<NodeUI>().ToList() )
+			{
+				RemoveNode( node );
+			}
+
+			e.Accepted = true;
+		}
+
 	}
 
 	internal PlugIn DropTarget { get; set; }
@@ -247,29 +305,6 @@ public class GraphView : GraphicsView
 
 			DropTarget?.Update();
 			DropTarget = null;
-		}
-	}
-
-	protected override void OnMousePress( MouseEvent e )
-	{
-		base.OnMousePress( e );
-
-		if ( NodeSelect == null )
-			return;
-
-		var item = GetItemAt( ToScene( e.LocalPosition ) );
-
-		if ( item is NodeUI node )
-		{
-			NodeSelect( node, true );
-		}
-		else if ( item is Plug plug )
-		{
-			NodeSelect( plug.Node, true );
-		}
-		else
-		{
-			NodeSelect( null, false );
 		}
 	}
 

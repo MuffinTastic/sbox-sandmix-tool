@@ -145,6 +145,21 @@ public class GraphView : GraphicsView
 			}
 		}
 
+		var rightClickedItem = GetItemAt( clickPos );
+
+		var nodeToDelete = rightClickedItem as NodeUI;
+		nodeToDelete ??= (rightClickedItem as Plug)?.Node;
+		if ( nodeToDelete is not null )
+		{
+			menu.AddSeparator();
+			menu.AddOption( "Delete" ).Triggered += () => RemoveNode( nodeToDelete );
+		}
+		else if ( rightClickedItem is Connection connectionToDelete )
+		{
+			menu.AddSeparator();
+			menu.AddOption( "Delete" ).Triggered += () => RemoveConnection( connectionToDelete );
+		}
+
 		menu.OpenAt( e.ScreenPosition );
 	}
 
@@ -278,6 +293,12 @@ public class GraphView : GraphicsView
 
 	private void RemoveNode( NodeUI node )
 	{
+		var badConnections = Connections.Where( c => c.IsAttachedTo( node ) ).ToList();
+		foreach ( var connection in badConnections )
+		{
+			connection.Disconnect();
+		}
+
 		Nodes.Remove( node );
 		Graph?.Remove( node.Node );
 		node.Destroy();

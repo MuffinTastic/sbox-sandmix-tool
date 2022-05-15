@@ -5,7 +5,6 @@ using System.Linq;
 using System.Reflection;
 using Tools;
 
-
 namespace SandMixTool.NodeGraph;
 
 public partial class NodeUI : Tools.GraphicsItem

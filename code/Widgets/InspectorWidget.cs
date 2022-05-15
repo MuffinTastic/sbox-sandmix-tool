@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Sandbox;
-using SandMix.Nodes;
 
 using SandMixTool.Inspector;
 using SandMixTool.NodeGraph;
@@ -58,7 +57,6 @@ public class InspectorWidget : DockWidget
 		var customeditor = CanEditAttribute.CreateEditorForObject( node );
 		if ( customeditor != null )
 		{
-			//customeditor.Bind( "Value" ).From( obj ).CreateReadOnlyLink();
 			Editor.Layout.Add( customeditor, 1 );
 		}
 		else

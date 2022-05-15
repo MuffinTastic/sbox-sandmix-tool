@@ -69,11 +69,16 @@ public class GraphView : GraphicsView
 		e.Accept();
 	}
 
-	internal void AddNodeType<T>( bool v )
+	internal void AddNodeType<T>()
 	{
-		if ( AvailableNodes.Contains( typeof( T ) ) ) return;
+		AddNodeType( typeof( T ) );
+	}
 
-		AvailableNodes.Add( typeof( T ) );
+	internal void AddNodeType( Type t )
+	{
+		if ( AvailableNodes.Contains( t ) ) return;
+
+		AvailableNodes.Add( t );
 	}
 
 	private class ContextGroup

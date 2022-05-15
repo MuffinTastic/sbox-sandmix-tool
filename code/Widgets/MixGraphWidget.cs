@@ -1,10 +1,13 @@
-﻿using SandMix;
+﻿using Sandbox;
+using SandMix;
+using SandMix.Nodes;
 using SandMix.Nodes.Audio;
 using SandMix.Nodes.Maths;
 using SandMixTool.Dialogs;
 using SandMixTool.NodeGraph;
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Tools;
 
@@ -41,12 +44,12 @@ public class MixGraphWidget : DockWidget
 	{
 		Widget = new GraphView( this );
 
-		GraphView.AddNodeType<TrackNode>( true );
-		GraphView.AddNodeType<OutputNode>( true );
+		var allNodeTypes = Library.GetAll<BaseNode>().Where( t => t != typeof( BaseNode ) );
+		foreach ( var nodeType in allNodeTypes )
+		{
 
-		GraphView.AddNodeType<FloatAddNode>( true );
-		GraphView.AddNodeType<FloatSubNode>( true );
-		GraphView.AddNodeType<Vec3AddNode>( true );
+			GraphView.AddNodeType( nodeType );
+		}
 
 		GraphView.GraphUpdated += () => {
 			Changed = true;

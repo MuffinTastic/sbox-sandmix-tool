@@ -129,12 +129,12 @@ public class GraphView : GraphicsView
 		var menu = new Menu( this );
 
 		// Sort and add the nodes
-		groups.Sort((a, b) => a.Name.CompareTo( b.Name ) );
-		
+		groups.Sort( ( a, b ) => a.Name.CompareTo( b.Name ) );
+
 		foreach ( var group in groups )
 		{
-			group.Items.Sort((a, b) => a.DisplayInfo.Name.CompareTo( b.DisplayInfo.Name ) );
-			
+			group.Items.Sort( ( a, b ) => a.DisplayInfo.Name.CompareTo( b.DisplayInfo.Name ) );
+
 			var subMenu = menu.AddMenu( group.Name );
 
 			foreach ( var item in group.Items )
@@ -187,9 +187,9 @@ public class GraphView : GraphicsView
 				.Where( c => c.Input == DropTarget && c != source )
 				.FirstOrDefault();
 
-			if ( nodeOutput.Node == DropTarget.Node ||	// Same node as was selected before
+			if ( nodeOutput.Node == DropTarget.Node ||  // Same node as was selected before
 				OutputType != InputType ||              // Incompatible type
-				otherConnected is not null )			// Other nodes are already connected
+				otherConnected is not null )            // Other nodes are already connected
 			{
 				DropTarget = null;
 			}
@@ -302,11 +302,13 @@ public class GraphView : GraphicsView
 		CallGraphUpdated();
 	}
 
-	internal void RemoveConnection( Connection c )
+	internal void RemoveConnection( Connection connection )
 	{
-		Connections.Remove( c );
-		Log.Info( $"Removed connection {c.Output.Identifier} → {c.Input.Identifier}" );
-		Graph?.Disconnect( c.Output.Identifier, c.Input.Identifier );
+		Connections.Remove( connection );
+		Graph?.Disconnect( connection.Output.Identifier, connection.Input.Identifier );
+		connection.Destroy();
+
+		Log.Info( $"Removed connection {connection.Output.Identifier} → {connection.Input.Identifier}" );
 
 		CallGraphUpdated();
 	}

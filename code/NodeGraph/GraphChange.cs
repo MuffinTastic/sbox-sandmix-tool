@@ -1,4 +1,4 @@
-﻿using SandMix;
+﻿using SandMix.Nodes;
 
 namespace SandMixTool.NodeGraph;
 

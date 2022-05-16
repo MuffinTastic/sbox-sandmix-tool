@@ -24,11 +24,16 @@ namespace Sandbox
 
 		private static readonly ConcurrentDictionary<string, Type> TypeDict = new();
 
-		[ModuleInitializer]
+		[ModuleInitializer, Event.Hotload]
 		public static void Initialize()
 		{
 			var assembly = Assembly.GetExecutingAssembly();
 			var types = assembly.GetTypes();
+
+			lock ( TypeDict )
+			{
+				TypeDict.Clear();
+			}
 
 			AddAssembly( assembly, types );
 		}

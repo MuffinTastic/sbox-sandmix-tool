@@ -46,12 +46,7 @@ public class MixGraphWidget : DockWidget
 	{
 		Widget = new GraphView( this );
 
-		var allNodeTypes = Library.GetAll<BaseNode>().Where( t => t != typeof( BaseNode ) );
-		foreach ( var nodeType in allNodeTypes )
-		{
-
-			GraphView.AddNodeType( nodeType );
-		}
+		AddNodeTypes();
 
 		GraphView.GraphUpdated += () => {
 			Changed = true;
@@ -62,6 +57,18 @@ public class MixGraphWidget : DockWidget
 		GraphView.OnSelectionChanged += () => MixGraphFocus( this );
 
 		UpdateTitle();
+	}
+
+	[Event.Hotload]
+	private void AddNodeTypes()
+	{
+		GraphView.ClearNodeTypes();
+
+		var allNodeTypes = Library.GetAll<BaseNode>().Where( t => t != typeof( BaseNode ) );
+		foreach ( var nodeType in allNodeTypes )
+		{
+			GraphView.AddNodeType( nodeType );
+		}
 	}
 
 	private void UpdateTitle()

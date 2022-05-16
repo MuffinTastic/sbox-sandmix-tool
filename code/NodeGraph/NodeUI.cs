@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using Tools;
 
 namespace SandMixTool.NodeGraph;
@@ -35,9 +36,7 @@ public partial class NodeUI : Tools.GraphicsItem
 		Size = new Vector2( 256, 512 );
 		Position = node.Position;
 
-		DisplayInfo = Sandbox.DisplayInfo.For( node );
-
-		Tooltip = DisplayInfo.Description ?? "No Description";
+		UpdateTooltip();
 
 		foreach ( var property in Node.GetType().GetProperties() )
 		{
@@ -61,6 +60,53 @@ public partial class NodeUI : Tools.GraphicsItem
 		}
 
 		Layout();
+	}
+
+	public void UpdateTooltip()
+	{
+		DisplayInfo = Sandbox.DisplayInfo.For( Node );
+
+		var tooltipBuilder = new StringBuilder();
+
+		tooltipBuilder.Append( DisplayInfo.Name );
+		tooltipBuilder.Append( '\n' );
+		tooltipBuilder.Append( DisplayInfo.Description ?? "No Description" );
+
+		if ( !string.IsNullOrEmpty( Node.Name ) )
+		{
+			tooltipBuilder.Append( '\n' );
+			tooltipBuilder.Append( "Name: " );
+			tooltipBuilder.Append( Node.Name );
+		}
+
+		if ( !string.IsNullOrEmpty( Node.Comment ) )
+		{
+			tooltipBuilder.Append( '\n' );
+
+			var commentBuilder = new StringBuilder();
+			commentBuilder.Append( "Comment: " );
+
+			var curLen = commentBuilder.Length;
+			const int rows = 64;
+
+			foreach ( var word in Node.Comment.Split(' ') )
+			{
+				curLen += word.Length + 1; // + space
+			
+				if ( curLen >= rows )
+				{
+					commentBuilder.Append( '\n' );
+					curLen = 0;
+				}
+
+				commentBuilder.Append( word );
+				commentBuilder.Append(' ');
+			}
+
+			tooltipBuilder.Append( commentBuilder );
+		}
+
+		Tooltip = tooltipBuilder.ToString().Trim();
 	}
 
 	void Layout()
@@ -97,6 +143,8 @@ public partial class NodeUI : Tools.GraphicsItem
 
 	protected override void OnPaint()
 	{
+		UpdateTooltip(); // this kinda sux but it's the only reliable way to do it
+
 		var rect = new Rect( 0, Size );//.Contract( 6, 0 );
 
 		PrimaryColor = new Color( 0.7f, 0.7f, 0.7f );
@@ -135,6 +183,7 @@ public partial class NodeUI : Tools.GraphicsItem
 
 		// titlebar
 		{
+			var iconSize = 17;
 			rect = new Rect( rect.Position, new Vector2( rect.width, TitleHeight ) ).Contract( 3 );
 
 			// title background
@@ -145,7 +194,7 @@ public partial class NodeUI : Tools.GraphicsItem
 			if ( DisplayInfo.Icon != null )
 			{
 				Paint.SetPen( PrimaryColor.WithAlpha( 0.7f ) );
-				Paint.DrawMaterialIcon( rect.Contract( 4 ), DisplayInfo.Icon, 17, TextFlag.LeftCenter );
+				Paint.DrawMaterialIcon( rect.Contract( 4 ), DisplayInfo.Icon, iconSize, TextFlag.LeftCenter );
 				rect.left += 18;
 			}
 
@@ -153,9 +202,32 @@ public partial class NodeUI : Tools.GraphicsItem
 			if ( !String.IsNullOrEmpty( Node.Name ) )
 				title += $" - {Node.Name}";
 
+			var hasComment = !string.IsNullOrEmpty( Node.Comment );
+
 			Paint.SetDefaultFont( 7, 500 );
 			Paint.SetPen( PrimaryColor );
+			var textRect = rect.Contract( 5 + (hasComment ? 7 : 0), 0 );
+
+			if ( Paint.MeasureText(textRect, title, TextFlag.LeftCenter).width > textRect.width )
+			{
+				string croppedTitle = title + "...";
+
+				while ( Paint.MeasureText( textRect, croppedTitle, TextFlag.LeftCenter ).width > textRect.width )
+				{
+					title = title.Substring( 0, title.Length - 1 );
+					croppedTitle = title + "...";
+				}
+
+				title = croppedTitle;
+			}
+
 			Paint.DrawText( rect.Contract( 5, 0 ), title, TextFlag.LeftCenter );
+
+			if ( hasComment )
+			{
+				Paint.SetPen( PrimaryColor.WithAlpha( 0.7f ) );
+				Paint.DrawMaterialIcon( rect.Contract( 4 ), "sticky_note_2", iconSize, TextFlag.RightCenter );
+			}
 		}
 	}
 

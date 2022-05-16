@@ -81,6 +81,11 @@ public class GraphView : GraphicsView
 		AvailableNodes.Add( t );
 	}
 
+	internal void ClearNodeTypes()
+	{
+		AvailableNodes.Clear();
+	}
+
 	private class ContextGroup
 	{
 		public string Name;

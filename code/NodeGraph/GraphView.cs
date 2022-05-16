@@ -152,17 +152,19 @@ public class GraphView : GraphicsView
 
 		var rightClickedItem = GetItemAt( clickPos );
 
-		var nodeToDelete = rightClickedItem as NodeUI;
-		nodeToDelete ??= (rightClickedItem as PlugUI)?.Node;
-		if ( nodeToDelete is not null )
+		if ( rightClickedItem is not null && rightClickedItem is not PlugUI )
 		{
-			menu.AddSeparator();
-			menu.AddOption( "Delete" ).Triggered += () => RemoveNode( nodeToDelete, addToUndo: true );
+			if ( !SelectedItems.Any() )
+			{
+				rightClickedItem.Selected = true;
+			}
 		}
-		else if ( rightClickedItem is ConnectionUI connectionToDelete )
+
+		if ( SelectedItems.Any() )
 		{
 			menu.AddSeparator();
-			menu.AddOption( "Delete" ).Triggered += () => RemoveConnection( connectionToDelete );
+			var action = menu.AddOption( "Delete selection" );
+			action.Triggered = OnGraphDelete;
 		}
 
 		menu.OpenAt( e.ScreenPosition );

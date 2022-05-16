@@ -196,17 +196,6 @@ public class GraphView : GraphicsView
 		{
 			SelectionBox.UpdateSelection( dragStart, lastMousePosition );
 		}
-		else
-		{
-			dragStart = ToScene( e.LocalPosition );
-			var item = GetItemAt( dragStart );
-			if ( item is null && e.ButtonState.HasFlag( MouseButtons.Left ) )
-			{
-				SelectionBox = new Selection( this );
-				SelectionBox.UpdateSelection( dragStart, lastMousePosition );
-				Add( SelectionBox );
-			}
-		}
 	}
 
 	NodeUI lastInspected;
@@ -224,13 +213,21 @@ public class GraphView : GraphicsView
 
 		NodeSelect( node, node is not null );
 		lastInspected = node;
+
+		if ( item is null && e.LeftMouseButton )
+		{
+			dragStart = ToScene( e.LocalPosition );
+			SelectionBox = new Selection( this );
+			SelectionBox.UpdateSelection( dragStart, lastMousePosition );
+			Add( SelectionBox );
+		}
 	}
 
 	protected override void OnMouseReleased( MouseEvent e )
 	{
 		base.OnMouseReleased( e );
 
-		if ( SelectionBox is not null && e.LeftMouseButton )
+		if ( SelectionBox is not null )
 		{
 			SelectionBox.Destroy();
 			SelectionBox = null;

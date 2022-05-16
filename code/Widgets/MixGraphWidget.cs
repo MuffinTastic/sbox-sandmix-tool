@@ -220,16 +220,16 @@ public class MixGraphWidget : DockWidget
 
 	public bool GraphCanUndo()
 	{
-		return true;
+		return GraphView.CanUndo();
 	}
 
 	public bool GraphCanRedo()
 	{
-		return false;
+		return GraphView.CanRedo();
 	}
 
 	public bool GraphHasSelection()
 	{
-		return GraphView.SelectedItems.Any();
+		return GraphView.HasSelection();
 	}
 }

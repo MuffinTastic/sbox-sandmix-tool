@@ -120,7 +120,7 @@ public class GraphView : GraphicsView
 			var item = new ContextItem
 			{
 				DisplayInfo = display,
-				Action = () => CreateNode( new NodeUI( this, Activator.CreateInstance( node ) as BaseNode ) { Position = clickPos } )
+				Action = () => CreateNode( new NodeUI( this, Activator.CreateInstance( node ) as BaseNode ) { Position = clickPos }, addToUndo: true )
 			};
 
 			group.Items.Add( item );
@@ -152,7 +152,7 @@ public class GraphView : GraphicsView
 		if ( nodeToDelete is not null )
 		{
 			menu.AddSeparator();
-			menu.AddOption( "Delete" ).Triggered += () => RemoveNode( nodeToDelete );
+			menu.AddOption( "Delete" ).Triggered += () => RemoveNode( nodeToDelete, addToUndo: true );
 		}
 		else if ( rightClickedItem is ConnectionUI connectionToDelete )
 		{
@@ -227,6 +227,11 @@ public class GraphView : GraphicsView
 		}
 	}
 
+	public bool HasSelection()
+	{
+		return SelectedItems.Any();
+	}
+
 	internal PlugIn DropTarget { get; set; }
 
 	ConnectionUI Preview;
@@ -281,7 +286,7 @@ public class GraphView : GraphicsView
 
 			if ( DropTarget != null )
 			{
-				CreateConnection( nodeOutput, DropTarget );
+				CreateConnection( nodeOutput, DropTarget, addToUndo: true );
 			}
 		}
 		finally
@@ -302,17 +307,27 @@ public class GraphView : GraphicsView
 		}
 	}
 
-	private void CreateNode( NodeUI node )
+	private void CreateNode( NodeUI node, bool addToUndo = false )
 	{
 		Nodes.Add( node );
 		Add( node );
 		Graph?.Add( node.Node );
 		Log.Info( $"Created {node.Node.GetType().Name} node {node.Node.Identifier}" );
 
+		if (addToUndo)
+		{
+			var undoState = new GraphChange();
+			undoState.Creation = true;
+			undoState.Graph = new Graph();
+			undoState.Graph.Add( node.Node );
+			UndoStates.Push( undoState );
+			RedoStates.Clear();
+		}
+
 		CallGraphUpdated();
 	}
 
-	private void RemoveNode( NodeUI node )
+	private void RemoveNode( NodeUI node, bool addToUndo = false )
 	{
 		var badConnections = Connections.Where( c => c.IsAttachedTo( node ) ).ToList();
 		foreach ( var connection in badConnections )
@@ -325,10 +340,20 @@ public class GraphView : GraphicsView
 		node.Destroy();
 		Log.Info( $"Removed {node.Node.GetType().Name} node {node.Node.Identifier}" );
 
+		if ( addToUndo )
+		{
+			var undoState = new GraphChange();
+			undoState.Creation = false;
+			undoState.Graph = new Graph();
+			undoState.Graph.Add( node.Node );
+			UndoStates.Push( undoState );
+			RedoStates.Clear();
+		}
+
 		CallGraphUpdated();
 	}
 
-	private void CreateConnection( PlugOut nodeOutput, PlugIn dropTarget )
+	private void CreateConnection( PlugOut nodeOutput, PlugIn dropTarget, bool addToUndo = false )
 	{
 		System.ArgumentNullException.ThrowIfNull( nodeOutput );
 		System.ArgumentNullException.ThrowIfNull( dropTarget );
@@ -341,16 +366,36 @@ public class GraphView : GraphicsView
 		Log.Info( $"Created connection {nodeOutput.Identifier} → {dropTarget.Identifier}" );
 		Graph?.Connect( nodeOutput.Identifier, dropTarget.Identifier );
 
+		if ( addToUndo )
+		{
+			var undoState = new GraphChange();
+			undoState.Creation = true;
+			undoState.Graph = new Graph();
+			undoState.Graph.Connect( nodeOutput.Identifier, dropTarget.Identifier );
+			UndoStates.Push( undoState );
+			RedoStates.Clear();
+		}
+
 		CallGraphUpdated();
 	}
 
-	internal void RemoveConnection( ConnectionUI connection )
+	internal void RemoveConnection( ConnectionUI connection, bool addToUndo = false )
 	{
 		Connections.Remove( connection );
 		Graph?.Disconnect( connection.Output.Identifier, connection.Input.Identifier );
 		connection.Destroy();
 
 		Log.Info( $"Removed connection {connection.Output.Identifier} → {connection.Input.Identifier}" );
+
+		if ( addToUndo )
+		{
+			var undoState = new GraphChange();
+			undoState.Creation = false;
+			undoState.Graph = new Graph();
+			undoState.Graph.Connect( connection.Output.Identifier, connection.Input.Identifier );
+			UndoStates.Push( undoState );
+			RedoStates.Clear();
+		}
 
 		CallGraphUpdated();
 	}
@@ -387,7 +432,7 @@ public class GraphView : GraphicsView
 		foreach ( var node in graph.Nodes )
 		{
 			var nodeUI = new NodeUI( this, node );
-			Add( nodeUI );
+			CreateNode( nodeUI );
 
 			if ( paste )
 				pastedNodes.Add( nodeUI );
@@ -399,9 +444,6 @@ public class GraphView : GraphicsView
 			{
 				item.Selected = false;
 			}
-
-			graph.RegenerateIdentifiers();
-
 
 			// guaranteed to have at least one
 			var firstNodeCenter = pastedNodes.First().Rect.Center;
@@ -502,20 +544,84 @@ public class GraphView : GraphicsView
 
 	// Shortcut events
 
+	Stack<GraphChange> UndoStates = new();
+	Stack<GraphChange> RedoStates = new();
+
+	public void ApplyGraphChange( GraphChange change )
+	{
+		if ( change.Creation )
+		{
+			// it's being annoying so let's go off of identifiers
+			var changeIdents = change.Graph.Nodes.Select( n => n.Identifier );
+
+			Log.Trace( Nodes.Count );
+
+			foreach ( var node in Nodes.Where( n => changeIdents.Contains( n.Node.Identifier ) ).ToList() )
+			{
+				RemoveNode( node );
+			}
+
+			foreach ( var connection in change.Graph.Connections )
+			{
+				var connUI = Connections.Find( c =>
+					c.Output.Identifier == connection.Item1 &&
+					c.Input.Identifier == connection.Item2
+				);
+
+				if ( connUI is null )
+				{
+					continue;
+				}
+
+				RemoveConnection( connUI );
+			}
+		}
+		else
+		{
+			BuildFromGraph( change.Graph );
+		}
+	}
+
 	public void OnGraphUndo()
 	{
+		if ( !CanUndo() )
+			return;
 
+		var state = UndoStates.Pop();
+
+		ApplyGraphChange( state );
+
+		state.Creation = !state.Creation;
+		RedoStates.Push( state );
+
+		CallGraphUpdated();
+
+		Focus();
 	}
 
 	public void OnGraphRedo()
 	{
+		if ( !CanRedo() )
+			return;
 
+		var state = RedoStates.Pop();
+		
+		ApplyGraphChange( state );
+
+		state.Creation = !state.Creation;
+		UndoStates.Push( state );
+
+		CallGraphUpdated();
+
+		Focus();
 	}
 
 	public void OnGraphCut()
 	{
 		OnGraphCopy();
 		OnGraphDelete();
+		Focus();
+
 	}
 
 	public void OnGraphCopy()
@@ -538,6 +644,8 @@ public class GraphView : GraphicsView
 		}
 
 		Clipboard.Copy( copyGraph.Serialize() );
+
+		Focus();
 	}
 
 	public void OnGraphPaste()
@@ -546,24 +654,59 @@ public class GraphView : GraphicsView
 		{
 			var pasteJson = Clipboard.Paste();
 			var pasteGraph = Graph.Deserialize( pasteJson );
+
 			if ( pasteGraph is not null )
+			{
+				pasteGraph.RegenerateIdentifiers();
 				BuildFromGraph( pasteGraph, paste: true );
+				
+				var undoState = new GraphChange();
+				undoState.Creation = true;
+				undoState.Graph = pasteGraph;
+				UndoStates.Push( undoState );
+			}
 		}
 		catch ( JsonException ex )
 		{
 
 		}
+
+		Focus();
 	}
 
 	public void OnGraphDelete()
 	{
-		// Due to the connection drag & drop it's actually impossible
-		// to keep a connection selected, so don't even bother getting them
+		var undoState = new GraphChange();
+		undoState.Creation = false;
+		undoState.Graph = new Graph();
+		
 		foreach ( var node in SelectedItems.OfType<NodeUI>().ToList() )
 		{
 			if ( node == lastInspected )
 				NodeSelect( null, false );
+
+			undoState.Graph.Add( node.Node );
+
+			foreach ( var connection in Connections.Where( c => c.IsAttachedTo( node ) ) )
+			{
+				undoState.Graph.Connect( connection.Output.Identifier, connection.Input.Identifier );
+			}
+
 			RemoveNode( node );
 		}
+
+		UndoStates.Push( undoState );
+
+		Focus();
+	}
+
+	public bool CanUndo()
+	{
+		return UndoStates.Any();
+	}
+
+	public bool CanRedo()
+	{
+		return RedoStates.Any();
 	}
 }

@@ -655,9 +655,10 @@ public class GraphView : GraphicsView
 
 	public void OnGraphPaste()
 	{
+		var pasteJson = Clipboard.Paste();
+		
 		try
 		{
-			var pasteJson = Clipboard.Paste();
 			var pasteGraph = Graph.Deserialize( pasteJson );
 
 			if ( pasteGraph is not null )
@@ -673,7 +674,8 @@ public class GraphView : GraphicsView
 		}
 		catch ( JsonException ex )
 		{
-
+			Log.Warning( $"Couldn't paste into mixgraph: {ex.Message}" );
+			Log.Warning( pasteJson );
 		}
 
 		Focus();

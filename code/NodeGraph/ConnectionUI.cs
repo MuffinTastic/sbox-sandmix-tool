@@ -2,14 +2,14 @@
 
 namespace SandMixTool.NodeGraph;
 
-public class Connection : Tools.GraphicsLine
+public class ConnectionUI : Tools.GraphicsLine
 {
 	public PlugOut Output { get; protected set; }
 	public PlugIn Input { get; protected set; }
 
 	Vector2 PreviewPosition;
 
-	public Connection( PlugOut output, PlugIn input ) : this( output )
+	public ConnectionUI( PlugOut output, PlugIn input ) : this( output )
 	{
 		HoverEvents = true;
 		Selectable = true;
@@ -18,7 +18,7 @@ public class Connection : Tools.GraphicsLine
 	}
 
 	// preview
-	public Connection( PlugOut output )
+	public ConnectionUI( PlugOut output )
 	{
 		Output = output;
 		ZIndex = -10;

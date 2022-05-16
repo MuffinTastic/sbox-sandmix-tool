@@ -126,7 +126,7 @@ public class MainWindow : Window
 		var hasSelection = CurrentMixGraph?.GraphHasSelection() ?? false;
 		GraphCutOption.Enabled = hasSelection;
 		GraphCopyOption.Enabled = hasSelection;
-		GraphPasteOption.Enabled = hasSelection;
+		GraphPasteOption.Enabled = mixGraphFocused;
 		GraphDeleteOption.Enabled = hasSelection;
 	}
 

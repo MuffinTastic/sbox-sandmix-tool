@@ -21,14 +21,14 @@ public class GraphView : GraphicsView
 			if ( _graph == value ) return;
 
 			_graph = value;
-			RebuildFromGraph();
+			RebuildAllFromMainGraph();
 		}
 	}
 
 	List<Type> AvailableNodes = new();
 
 	List<NodeUI> Nodes = new();
-	List<Connection> Connections = new();
+	List<ConnectionUI> Connections = new();
 
 	public event Action<NodeUI, bool> NodeSelect;
 	public event Action GraphUpdated;
@@ -148,13 +148,13 @@ public class GraphView : GraphicsView
 		var rightClickedItem = GetItemAt( clickPos );
 
 		var nodeToDelete = rightClickedItem as NodeUI;
-		nodeToDelete ??= (rightClickedItem as Plug)?.Node;
+		nodeToDelete ??= (rightClickedItem as PlugUI)?.Node;
 		if ( nodeToDelete is not null )
 		{
 			menu.AddSeparator();
 			menu.AddOption( "Delete" ).Triggered += () => RemoveNode( nodeToDelete );
 		}
-		else if ( rightClickedItem is Connection connectionToDelete )
+		else if ( rightClickedItem is ConnectionUI connectionToDelete )
 		{
 			menu.AddSeparator();
 			menu.AddOption( "Delete" ).Triggered += () => RemoveConnection( connectionToDelete );
@@ -190,6 +190,9 @@ public class GraphView : GraphicsView
 			SelectionBox.UpdateSelection( dragStart, lastMousePosition );
 		}
 	}
+
+	NodeUI lastInspected;
+
 	protected override void OnMousePress( MouseEvent e )
 	{
 		base.OnMousePress( e );
@@ -199,9 +202,10 @@ public class GraphView : GraphicsView
 
 		var item = GetItemAt( ToScene( e.LocalPosition ) );
 		var node = item as NodeUI;
-		node ??= (item as Plug)?.Node;
+		node ??= (item as PlugUI)?.Node;
 
 		NodeSelect( node, node is not null );
+		lastInspected = node;
 
 		if ( item is null && e.LeftMouseButton )
 		{
@@ -225,9 +229,9 @@ public class GraphView : GraphicsView
 
 	internal PlugIn DropTarget { get; set; }
 
-	Connection Preview;
+	ConnectionUI Preview;
 
-	internal void DraggingOutput( NodeUI node, NodeGraph.PlugOut nodeOutput, Vector2 scenePosition, Connection source )
+	internal void DraggingOutput( NodeUI node, NodeGraph.PlugOut nodeOutput, Vector2 scenePosition, ConnectionUI source )
 	{
 		var item = GetItemAt( scenePosition );
 
@@ -253,14 +257,14 @@ public class GraphView : GraphicsView
 
 		if ( Preview == null )
 		{
-			Preview = new Connection( nodeOutput );
+			Preview = new ConnectionUI( nodeOutput );
 			Add( Preview );
 		}
 
 		Preview.LayoutForPreview( nodeOutput, scenePosition, DropTarget );
 	}
 
-	internal void DroppedOutput( NodeUI node, NodeGraph.PlugOut nodeOutput, Vector2 scenePosition, Connection source )
+	internal void DroppedOutput( NodeUI node, NodeGraph.PlugOut nodeOutput, Vector2 scenePosition, ConnectionUI source )
 	{
 		try
 		{
@@ -329,7 +333,7 @@ public class GraphView : GraphicsView
 		System.ArgumentNullException.ThrowIfNull( nodeOutput );
 		System.ArgumentNullException.ThrowIfNull( dropTarget );
 
-		var connection = new Connection( nodeOutput, dropTarget );
+		var connection = new ConnectionUI( nodeOutput, dropTarget );
 		connection.Layout();
 		Add( connection );
 
@@ -340,7 +344,7 @@ public class GraphView : GraphicsView
 		CallGraphUpdated();
 	}
 
-	internal void RemoveConnection( Connection connection )
+	internal void RemoveConnection( ConnectionUI connection )
 	{
 		Connections.Remove( connection );
 		Graph?.Disconnect( connection.Output.Identifier, connection.Input.Identifier );
@@ -369,17 +373,70 @@ public class GraphView : GraphicsView
 		GraphUpdated();
 	}
 
-	void RebuildFromGraph()
+	Rect GetVisibleArea()
 	{
-		DeleteAllItems();
+		var topLeft = ToScene( 0 );
+		var bottomRight = ToScene( Size );
+		return new Rect( topLeft, bottomRight - topLeft );
+	}
 
-		foreach ( var item in _graph.Nodes )
+	void BuildFromGraph( Graph graph, bool paste = false )
+	{
+		var pastedNodes = new List<NodeUI>();
+
+		foreach ( var node in graph.Nodes )
 		{
-			Add( new NodeUI( this, item ) );
+			var nodeUI = new NodeUI( this, node );
+			Add( nodeUI );
+
+			if ( paste )
+				pastedNodes.Add( nodeUI );
 		}
 
-		foreach ( var connection in _graph.Connections )
+		if ( pastedNodes.Any() )
 		{
+			foreach ( var item in SelectedItems )
+			{
+				item.Selected = false;
+			}
+
+			graph.RegenerateIdentifiers();
+
+
+			// guaranteed to have at least one
+			var firstNodeCenter = pastedNodes.First().Rect.Center;
+			var topLeft = firstNodeCenter;
+			var bottomRight = firstNodeCenter;
+			
+			foreach ( var node in pastedNodes )
+			{
+				topLeft = topLeft.ComponentMin( node.Rect.Center );
+				bottomRight = bottomRight.ComponentMax( node.Rect.Center );
+			}
+
+			var areaSize = bottomRight - topLeft;
+			var nodesCenter = topLeft + areaSize / 2;
+
+			var visibleArea = GetVisibleArea();
+			Vector2 target = IsUnderMouse ? lastMousePosition : visibleArea.Center;
+
+			var adjustToCenter = nodesCenter - target;
+
+
+			// now actually offset them
+			foreach ( var node in pastedNodes )
+			{
+				node.Position -= adjustToCenter;
+				node.Selected = true;
+				Log.Info( $"pasted node {node.Node.Identifier}" );
+			}
+		}
+
+		foreach ( var connection in graph.Connections )
+		{
+			if ( paste )
+				Log.Info( $"pasted connection {connection}" );
+
 			var o = FindPlugOut( connection.Item1 );
 			if ( o == null )
 			{
@@ -399,6 +456,12 @@ public class GraphView : GraphicsView
 
 			CreateConnection( o, i );
 		}
+	}
+
+	void RebuildAllFromMainGraph()
+	{
+		DeleteAllItems();
+		BuildFromGraph( _graph );
 	}
 
 	public void SetHandleConfig( System.Type t, HandleConfig config )
@@ -457,12 +520,39 @@ public class GraphView : GraphicsView
 
 	public void OnGraphCopy()
 	{
+		var copyGraph = new Graph();
 
+		// Only nodes get selected so we'll have to find the connections ourselves
+		//                     But let's be sure V
+		copyGraph.Nodes = SelectedItems.OfType<NodeUI>().Select( n => n.Node ).ToList();
+
+		foreach ( var connection in Connections )
+		{
+			if ( !copyGraph.Nodes.Contains( connection.Output.Node.Node ) )
+				continue;
+
+			if ( !copyGraph.Nodes.Contains( connection.Input.Node.Node ) )
+				continue;
+
+			copyGraph.Connect( connection.Output.Identifier, connection.Input.Identifier );
+		}
+
+		Clipboard.Copy( copyGraph.Serialize() );
 	}
 
 	public void OnGraphPaste()
 	{
+		try
+		{
+			var pasteJson = Clipboard.Paste();
+			var pasteGraph = Graph.Deserialize( pasteJson );
+			if ( pasteGraph is not null )
+				BuildFromGraph( pasteGraph, paste: true );
+		}
+		catch ( JsonException ex )
+		{
 
+		}
 	}
 
 	public void OnGraphDelete()
@@ -471,6 +561,8 @@ public class GraphView : GraphicsView
 		// to keep a connection selected, so don't even bother getting them
 		foreach ( var node in SelectedItems.OfType<NodeUI>().ToList() )
 		{
+			if ( node == lastInspected )
+				NodeSelect( null, false );
 			RemoveNode( node );
 		}
 	}

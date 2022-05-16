@@ -2,7 +2,7 @@
 
 namespace SandMixTool.NodeGraph;
 
-public class Plug : Tools.GraphicsItem
+public class PlugUI : Tools.GraphicsItem
 {
 	public const float HandleSize = 14;
 
@@ -20,7 +20,7 @@ public class Plug : Tools.GraphicsItem
 #pragma warning restore CS0114
 	public virtual Vector2 HandleCenter => HandlePosition + HandleSize / 2;
 
-	public Plug( NodeUI node, System.Reflection.PropertyInfo property )
+	public PlugUI( NodeUI node, System.Reflection.PropertyInfo property )
 	{
 		Size = new Vector2( 24, 24 );
 		Node = node;

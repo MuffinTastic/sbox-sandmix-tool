@@ -3,7 +3,7 @@ using Tools;
 
 namespace SandMixTool.NodeGraph;
 
-public class PlugOut : Plug
+public class PlugOut : PlugUI
 {
 	public bool Dragging { get; protected set; }
 

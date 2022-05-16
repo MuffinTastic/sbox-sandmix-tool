@@ -3,7 +3,7 @@ using Tools;
 
 namespace SandMixTool.NodeGraph;
 
-public class PlugIn : Plug
+public class PlugIn : PlugUI
 {
 	PlugIn DropTarget => Node.Graph.DropTarget;
 

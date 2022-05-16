@@ -159,12 +159,12 @@ public partial class NodeUI : Tools.GraphicsItem
 		}
 	}
 
-	internal void DraggingOutput( PlugOut nodeOutput, Vector2 scenePosition, Connection source = null )
+	internal void DraggingOutput( PlugOut nodeOutput, Vector2 scenePosition, ConnectionUI source = null )
 	{
 		Graph?.DraggingOutput( this, nodeOutput, scenePosition, source );
 	}
 
-	internal void DroppedOutput( PlugOut nodeOutput, Vector2 scenePosition, Connection source = null )
+	internal void DroppedOutput( PlugOut nodeOutput, Vector2 scenePosition, ConnectionUI source = null )
 	{
 		Graph?.DroppedOutput( this, nodeOutput, scenePosition, source );
 	}

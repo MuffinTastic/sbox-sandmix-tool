@@ -160,6 +160,7 @@ public class MainWindow : Window
 		var mixGraph = new MixGraphWidget( this );
 		mixGraph.MixGraphFocus += OnMixGraphFocus;
 		mixGraph.MixGraphClose += OnMixGraphClose;
+		mixGraph.GraphView.GraphUpdated += UpdateMenuBar;
 
 		if ( Inspector is not null )
 			mixGraph.GraphView.NodeSelect += Inspector.StartInspecting;

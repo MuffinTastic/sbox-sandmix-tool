@@ -1,5 +1,6 @@
 ﻿using Sandbox;
 using SandMix.Nodes;
+using SandMix.Nodes.Audio;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,8 +11,8 @@ namespace SandMixTool.NodeGraph;
 
 public class GraphView : GraphicsView
 {
-	Graph _graph;
-	public Graph Graph
+	GraphContainer _graph;
+	public GraphContainer Graph
 	{
 		get => _graph;
 		set
@@ -47,9 +48,9 @@ public class GraphView : GraphicsView
 		SetHandleConfig( typeof( float ), new HandleConfig { Color = Color.Parse( "#be9363" ).Value, Icon = "f", Name = "Float" } );
 		SetHandleConfig( typeof( Vector3 ), new HandleConfig { Color = Color.Parse( "#fff08a" ).Value, Icon = "v", Name = "Vector3" } );
 		SetHandleConfig( typeof( bool ), new HandleConfig { Color = Color.Parse( "#b49dc9" ).Value, Icon = "b", Name = "Boolean" } );
-		SetHandleConfig( typeof( SandMix.Nodes.Types.Audio ), new HandleConfig { Color = Color.Parse( "#9dc2d5" ).Value, Icon = "a", Name = "Audio" } );
+		SetHandleConfig( typeof( BaseAudio ), new HandleConfig { Color = Color.Parse( "#9dc2d5" ).Value, Icon = "a", Name = "Audio" } );
 
-		Graph = new Graph();
+		Graph = new GraphContainer();
 	}
 
 	public override void OnDestroyed()
@@ -325,7 +326,7 @@ public class GraphView : GraphicsView
 		{
 			var undoState = new GraphChange();
 			undoState.Creation = true;
-			undoState.Graph = new Graph();
+			undoState.Graph = new GraphContainer();
 			undoState.Graph.Add( node.Node );
 			UndoStates.Push( undoState );
 			RedoStates.Clear();
@@ -353,7 +354,7 @@ public class GraphView : GraphicsView
 		{
 			var undoState = new GraphChange();
 			undoState.Creation = false;
-			undoState.Graph = new Graph();
+			undoState.Graph = new GraphContainer();
 			undoState.Graph.Add( node.Node );
 			UndoStates.Push( undoState );
 			RedoStates.Clear();
@@ -381,7 +382,7 @@ public class GraphView : GraphicsView
 		{
 			var undoState = new GraphChange();
 			undoState.Creation = true;
-			undoState.Graph = new Graph();
+			undoState.Graph = new GraphContainer();
 			undoState.Graph.Connect( nodeOutput.Identifier, dropTarget.Identifier );
 			UndoStates.Push( undoState );
 			RedoStates.Clear();
@@ -403,7 +404,7 @@ public class GraphView : GraphicsView
 		{
 			var undoState = new GraphChange();
 			undoState.Creation = false;
-			undoState.Graph = new Graph();
+			undoState.Graph = new GraphContainer();
 			undoState.Graph.Connect( connection.Output.Identifier, connection.Input.Identifier );
 			UndoStates.Push( undoState );
 			RedoStates.Clear();
@@ -437,7 +438,7 @@ public class GraphView : GraphicsView
 		return new Rect( topLeft, bottomRight - topLeft );
 	}
 
-	void BuildFromGraph( Graph graph, bool paste = false )
+	void BuildFromGraph( GraphContainer graph, bool paste = false )
 	{
 		var pastedNodes = new List<NodeUI>();
 
@@ -640,7 +641,7 @@ public class GraphView : GraphicsView
 
 	public void OnGraphCopy()
 	{
-		var copyGraph = new Graph();
+		var copyGraph = new GraphContainer();
 
 		// Only nodes get selected so we'll have to find the connections ourselves
 		//                     But let's be sure V
@@ -668,7 +669,7 @@ public class GraphView : GraphicsView
 		
 		try
 		{
-			var pasteGraph = Graph.Deserialize( pasteJson );
+			var pasteGraph = GraphContainer.Deserialize( pasteJson );
 
 			if ( pasteGraph is not null )
 			{
@@ -694,7 +695,7 @@ public class GraphView : GraphicsView
 	{
 		var undoState = new GraphChange();
 		undoState.Creation = false;
-		undoState.Graph = new Graph();
+		undoState.Graph = new GraphContainer();
 		
 		foreach ( var node in SelectedItems.OfType<NodeUI>().ToList() )
 		{

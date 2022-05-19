@@ -134,7 +134,7 @@ public class MixGraphWidget : DockWidget
 		FilePath = filePath;
 
 		var json = File.ReadAllText( FilePath );
-		var graph = Graph.Deserialize( json );
+		var graph = GraphContainer.Deserialize( json );
 		GraphView.Graph = graph;
 
 		Changed = false;

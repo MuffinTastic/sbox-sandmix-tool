@@ -10,4 +10,6 @@ public static class SandMixTool
 
 	public const string FileExtension = "smix";
 	public const string FileFilter = $"{ProjectName} (*.{FileExtension});;All files (*.*)";
+
+	public static bool Debug { get; set; } = false;
 }

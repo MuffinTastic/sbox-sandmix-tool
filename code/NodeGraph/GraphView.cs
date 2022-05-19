@@ -317,7 +317,9 @@ public class GraphView : GraphicsView
 		Nodes.Add( node );
 		Add( node );
 		Graph?.Add( node.Node );
-		Log.Info( $"Created {node.Node.GetType().Name} node {node.Node.Identifier}" );
+
+		if ( SandMixTool.Debug )
+			Log.Info( $"Created {node.Node.GetType().Name} node {node.Node.Identifier}" );
 
 		if (addToUndo)
 		{
@@ -343,7 +345,9 @@ public class GraphView : GraphicsView
 		Nodes.Remove( node );
 		Graph?.Remove( node.Node );
 		node.Destroy();
-		Log.Info( $"Removed {node.Node.GetType().Name} node {node.Node.Identifier}" );
+
+		if ( SandMixTool.Debug )
+			Log.Info( $"Removed {node.Node.GetType().Name} node {node.Node.Identifier}" );
 
 		if ( addToUndo )
 		{
@@ -368,8 +372,10 @@ public class GraphView : GraphicsView
 		Add( connection );
 
 		Connections.Add( connection );
-		Log.Info( $"Created connection {nodeOutput.Identifier} → {dropTarget.Identifier}" );
 		Graph?.Connect( nodeOutput.Identifier, dropTarget.Identifier );
+
+		if ( SandMixTool.Debug )
+			Log.Info( $"Created connection {nodeOutput.Identifier} → {dropTarget.Identifier}" );
 
 		if ( addToUndo )
 		{
@@ -390,7 +396,8 @@ public class GraphView : GraphicsView
 		Graph?.Disconnect( connection.Output.Identifier, connection.Input.Identifier );
 		connection.Destroy();
 
-		Log.Info( $"Removed connection {connection.Output.Identifier} → {connection.Input.Identifier}" );
+		if ( SandMixTool.Debug )
+			Log.Info( $"Removed connection {connection.Output.Identifier} → {connection.Input.Identifier}" );
 
 		if ( addToUndo )
 		{
@@ -475,14 +482,16 @@ public class GraphView : GraphicsView
 			{
 				node.Position -= adjustToCenter;
 				node.Selected = true;
-				Log.Info( $"pasted node {node.Node.Identifier}" );
+
+				if ( SandMixTool.Debug )
+					Log.Info( $"pasted node {node.Node.Identifier}" );
 			}
 		}
 
 		foreach ( var connection in graph.Connections )
 		{
-			if ( paste )
-				Log.Info( $"pasted connection {connection}" );
+			if ( SandMixTool.Debug && paste )
+				Log.Info( $"Pasted connection {connection}" );
 
 			var o = FindPlugOut( connection.Item1 );
 			if ( o == null )

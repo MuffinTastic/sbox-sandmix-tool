@@ -64,7 +64,7 @@ public class MixGraphWidget : DockWidget
 	{
 		GraphView.ClearNodeTypes();
 
-		var allNodeTypes = Library.GetAll<BaseNode>().Where( t => t != typeof( BaseNode ) );
+		var allNodeTypes = Library.GetAll<BaseNode>();
 		foreach ( var nodeType in allNodeTypes )
 		{
 			GraphView.AddNodeType( nodeType );

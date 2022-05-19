@@ -50,10 +50,12 @@ namespace Sandbox
 
 			lock ( TypeDict )
 			{
-				Type[] array = types;
+				var array = types;
 				foreach ( Type type in array )
 				{
-					TypeDict[type.Name] = type;
+					var attr = type.GetCustomAttribute<LibraryAttribute>();
+					if ( attr is not null )
+						TypeDict[type.Name] = type;
 				}
 			}
 		}

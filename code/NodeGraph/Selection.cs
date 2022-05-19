@@ -46,7 +46,6 @@ public partial class Selection : Tools.GraphicsItem
 		if ( start.x < end.x || start.y < end.y ) // bottom right quad
 		{
 			Size = lastDrawSize;
-			Log.Info( $"{size - DrawSize}" );
 			DrawSize = size;
 		}
 		else

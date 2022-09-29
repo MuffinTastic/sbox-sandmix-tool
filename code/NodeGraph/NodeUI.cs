@@ -172,19 +172,19 @@ public partial class NodeUI : Tools.GraphicsItem
 		{
 			Paint.SetPen( SelectionOutline, 2.0f );
 			Paint.SetBrushEmpty();
-			Paint.DrawRect( rect.Contract( 1 ), 4.0f );
+			Paint.DrawRect( rect.Shrink( 1 ), 4.0f );
 		}
 		else if ( Paint.HasMouseOver )
 		{
 			Paint.SetPen( SelectionOutline.WithAlpha( 0.4f ), 2.0f );
 			Paint.SetBrushEmpty();
-			Paint.DrawRect( rect.Contract( 1 ), 4.0f );
+			Paint.DrawRect( rect.Shrink( 1 ), 4.0f );
 		}
 
 		// titlebar
 		{
 			var iconSize = 17;
-			rect = new Rect( rect.Position, new Vector2( rect.width, TitleHeight ) ).Contract( 3 );
+			rect = new Rect( rect.Position, new Vector2( rect.Width, TitleHeight ) ).Shrink( 3 );
 
 			// title background
 			Paint.ClearPen();
@@ -194,8 +194,8 @@ public partial class NodeUI : Tools.GraphicsItem
 			if ( DisplayInfo.Icon != null )
 			{
 				Paint.SetPen( PrimaryColor.WithAlpha( 0.7f ) );
-				Paint.DrawMaterialIcon( rect.Contract( 4 ), DisplayInfo.Icon, iconSize, TextFlag.LeftCenter );
-				rect.left += 18;
+				Paint.DrawIcon( rect.Shrink( 4 ), DisplayInfo.Icon, iconSize, TextFlag.LeftCenter );
+				rect.Left += 18;
 			}
 
 			var title = DisplayInfo.Name;
@@ -206,13 +206,13 @@ public partial class NodeUI : Tools.GraphicsItem
 
 			Paint.SetDefaultFont( 7, 500 );
 			Paint.SetPen( PrimaryColor );
-			var textRect = rect.Contract( 5 + (hasComment ? 7 : 0), 0 );
+			var textRect = rect.Shrink( 5 + (hasComment ? 7 : 0), 0 );
 
-			if ( Paint.MeasureText(textRect, title, TextFlag.LeftCenter).width > textRect.width )
+			if ( Paint.MeasureText(textRect, title, TextFlag.LeftCenter).Width > textRect.Width )
 			{
 				string croppedTitle = title + "...";
 
-				while ( Paint.MeasureText( textRect, croppedTitle, TextFlag.LeftCenter ).width > textRect.width )
+				while ( Paint.MeasureText( textRect, croppedTitle, TextFlag.LeftCenter ).Width > textRect.Width )
 				{
 					title = title.Substring( 0, title.Length - 1 );
 					croppedTitle = title + "...";
@@ -221,12 +221,12 @@ public partial class NodeUI : Tools.GraphicsItem
 				title = croppedTitle;
 			}
 
-			Paint.DrawText( rect.Contract( 5, 0 ), title, TextFlag.LeftCenter );
+			Paint.DrawText( rect.Shrink( 5, 0 ), title, TextFlag.LeftCenter );
 
 			if ( hasComment )
 			{
 				Paint.SetPen( PrimaryColor.WithAlpha( 0.7f ) );
-				Paint.DrawMaterialIcon( rect.Contract( 4 ), "sticky_note_2", iconSize, TextFlag.RightCenter );
+				Paint.DrawIcon( rect.Shrink( 4 ), "sticky_note_2", iconSize, TextFlag.RightCenter );
 			}
 		}
 	}

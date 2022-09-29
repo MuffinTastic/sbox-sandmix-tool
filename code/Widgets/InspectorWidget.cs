@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Sandbox;
 
-using SandMixTool.Inspector;
 using SandMixTool.NodeGraph;
 
 namespace SandMixTool.Widgets;
@@ -47,7 +46,7 @@ public class InspectorWidget : DockWidget
 
 	public void StartInspecting( NodeUI nodeUI, bool addToHistory = true )
 	{
-		using var sx = new SuspendUpdates( this );
+		using var sx = SuspendUpdates.For( this );
 
 		Editor.DestroyChildren();
 
@@ -61,7 +60,7 @@ public class InspectorWidget : DockWidget
 		}
 		else
 		{
-			var PropertySheet = new PropertySheet( this );
+			var PropertySheet = new Tools.PropertySheet( this );
 			PropertySheet.Target = node;
 
 			var scroller = new ScrollArea( this );
@@ -175,7 +174,7 @@ public class InspectorHeader : ToolBar
 
 		title = new Label( this );
 		title.Text = "";
-		title.Alignment = TextFlag.VCenter;
+		title.Alignment = TextFlag.CenterVertically;
 		AddWidget( title );
 
 		UpdateBackForward( false, false );

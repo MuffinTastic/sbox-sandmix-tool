@@ -60,7 +60,7 @@ public partial class Selection : Tools.GraphicsItem
 		var items = Graph.Items.OfType<NodeUI>();
 		foreach ( var item in items )
 		{
-			item.Selected = selectionRect.IsInside( item.Rect );
+			item.Selected = selectionRect.IsInside( item.SceneRect );
 		}
 	}
 }

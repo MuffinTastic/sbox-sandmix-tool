@@ -459,14 +459,14 @@ public class GraphView : GraphicsView
 			}
 
 			// guaranteed to have at least one
-			var firstNodeCenter = pastedNodes.First().Rect.Center;
+			var firstNodeCenter = pastedNodes.First().SceneRect.Center;
 			var topLeft = firstNodeCenter;
 			var bottomRight = firstNodeCenter;
 			
 			foreach ( var node in pastedNodes )
 			{
-				topLeft = topLeft.ComponentMin( node.Rect.Center );
-				bottomRight = bottomRight.ComponentMax( node.Rect.Center );
+				topLeft = topLeft.ComponentMin( node.SceneRect.Center );
+				bottomRight = bottomRight.ComponentMax( node.SceneRect.Center );
 			}
 
 			var areaSize = bottomRight - topLeft;

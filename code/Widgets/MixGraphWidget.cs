@@ -64,10 +64,10 @@ public class MixGraphWidget : DockWidget
 	{
 		GraphView.ClearNodeTypes();
 
-		var allNodeTypes = Library.GetAll<BaseNode>();
+		var allNodeTypes = TypeLibrary.GetDescriptions<BaseNode>();
 		foreach ( var nodeType in allNodeTypes )
 		{
-			GraphView.AddNodeType( nodeType );
+			GraphView.AddNodeType( nodeType.TargetType );
 		}
 	}
 

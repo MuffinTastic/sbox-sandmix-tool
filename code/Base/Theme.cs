@@ -58,7 +58,7 @@ public static class Theme
 
 		// if we really cared we could do this better
 		var size = Paint.MeasureText( rect, filename, flags );
-		var overshoot = (size.width - rect.width) + 5;
+		var overshoot = (size.Width - rect.Width) + 5;
 		if ( overshoot > 0 )
 		{
 			overshoot += 10;
@@ -69,10 +69,10 @@ public static class Theme
 
 		Paint.SetPen( color.Darken( 0.3f ) );
 		var r = Paint.DrawText( rect, dir, flags );
-		rect.left += r.width;
+		rect.Left += r.Width;
 		Paint.SetPen( color );
 		r = Paint.DrawText( rect, file, flags );
-		rect.left += r.width;
+		rect.Left += r.Width;
 		Paint.SetPen( color.Darken( 0.1f ) );
 		r = Paint.DrawText( rect, extension, flags );
 	}
@@ -87,7 +87,7 @@ public static class Theme
 		if ( Paint.HasMouseOver )
 			c = c.Lighten( 0.2f );
 
-		rect = rect.Contract( 1 );
+		rect = rect.Shrink( 1 );
 		rect.Position -= 1;
 
 		Paint.SetBrush( Color.White.WithAlpha( 0.3f ) );

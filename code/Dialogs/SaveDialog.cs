@@ -21,7 +21,7 @@ public class SaveDialog : Dialog
 	public SaveDialog( IEnumerable<MixGraphWidget> mixGraphs, Widget parent = null ) : base( parent )
 	{
 		Window.Size = new Vector2( 400, 150 );
-		Window.CloseButtonVisible = false;
+		Window.IsDialog = true;
 		Window.MaximumSize = Size;
 		Window.Title = "Save changes?";
 		Window.SetModal( true );

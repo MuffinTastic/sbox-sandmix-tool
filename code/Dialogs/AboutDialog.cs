@@ -9,7 +9,7 @@ public class AboutDialog : Dialog
 	public AboutDialog( Widget parent = null ) : base( parent )
 	{
 		Window.Size = new Vector2( 350, 250 );
-		Window.CloseButtonVisible = true;
+		Window.IsDialog = true;
 		Window.MaximumSize = Size;
 		Window.Title = $"About {SandMixTool.ProjectName}";
 		Window.SetModal( true );
@@ -35,7 +35,7 @@ public class AboutDialog : Dialog
 		{
 			var titleVersionLabel = new Label( infoArea.Canvas );
 			titleVersionLabel.Text = $"{SandMixTool.ProjectName} <b>v{SandMixTool.ProjectVersion}</b>";
-			titleVersionLabel.Alignment = TextFlag.HCenter;
+			titleVersionLabel.Alignment = TextFlag.CenterHorizontally;
 			l.Add( titleVersionLabel );
 
 			var authorsLabel = new Label( infoArea.Canvas );
@@ -44,7 +44,7 @@ public class AboutDialog : Dialog
 			{
 				authorsLabel.Text += $"{author}\n";
 			}
-			authorsLabel.Alignment = TextFlag.HCenter;
+			authorsLabel.Alignment = TextFlag.CenterHorizontally;
 			l.Add( authorsLabel );
 
 			l.AddStretchCell();

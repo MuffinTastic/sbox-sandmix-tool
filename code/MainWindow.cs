@@ -214,13 +214,12 @@ public class MainWindow : Window
 		}
 	}
 
-	public override void OnClose( CloseEvent e )
+	protected override void OnClosed()
 	{
 		var unsavedMixGraphs = MixGraphs.Where( mg => mg.Changed && mg.AttemptSave );
 
 		if ( unsavedMixGraphs.Count() == 0 )
 		{
-			e.Accept();
 			return;
 		}
 
@@ -245,8 +244,6 @@ public class MainWindow : Window
 
 			Close();
 		};
-
-		e.Ignore();
 	}
 
 	public void OnMixGraphFocus( MixGraphWidget mixGraph )

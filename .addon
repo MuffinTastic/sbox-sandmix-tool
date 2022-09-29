@@ -10,5 +10,11 @@
   "HasCode": true,
   "CodePath": "/code/",
   "RootNamespace": "SandMixTool",
-  "Metadata": {}
+  "Metadata": {
+    "Compiler": {
+      "RootNamespace": "Sandbox",
+      "DefineConstants": "SANDBOX;ADDON;DEBUG;SMIXTOOL",
+      "NoWarn": "1701;1702;1591;"
+    }
+  }
 }

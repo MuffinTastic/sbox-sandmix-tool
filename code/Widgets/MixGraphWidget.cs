@@ -64,7 +64,7 @@ public class MixGraphWidget : DockWidget
 	{
 		GraphView.ClearNodeTypes();
 
-		var allNodeTypes = TypeLibrary.GetDescriptions<BaseNode>();
+		var allNodeTypes = TypeLibrary.GetDescriptions<BaseNode>().Where( td => !td.IsAbstract );
 		foreach ( var nodeType in allNodeTypes )
 		{
 			GraphView.AddNodeType( nodeType.TargetType );

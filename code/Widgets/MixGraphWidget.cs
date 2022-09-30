@@ -193,6 +193,7 @@ public class MixGraphWidget : DockWidget
 		base.OnDestroyed();
 
 		MixGraphClose( this );
+		GraphView.Graph = null;
 	}
 
 	public void GraphUndo()

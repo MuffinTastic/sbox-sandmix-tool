@@ -443,6 +443,9 @@ public class GraphView : GraphicsView
 
 	void BuildFromGraph( GraphContainer graph, bool paste = false )
 	{
+		if ( graph is null )
+			return;
+
 		var pastedNodes = new List<NodeUI>();
 
 		foreach ( var node in graph.Nodes )

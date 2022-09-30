@@ -642,7 +642,6 @@ public class GraphView : GraphicsView
 		OnGraphCopy();
 		OnGraphDelete();
 		Focus();
-
 	}
 
 	public void OnGraphCopy()

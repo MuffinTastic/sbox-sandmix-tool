@@ -51,9 +51,6 @@ public class GraphView : GraphicsView
 		SetHandleConfig( typeof( AudioSamples ), new HandleConfig { Color = Color.Parse( "#9dc2d5" ).Value, Icon = "a", Name = "Audio" } );
 
 		Graph = new GraphContainer();
-
-		// debug
-		GraphUpdated += () => Utility.InspectorObject = Graph;
 	}
 
 	public override void OnDestroyed()

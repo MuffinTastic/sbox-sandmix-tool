@@ -39,7 +39,7 @@ public class SaveDialog : Dialog
 		Layout.Spacing = 10;
 
 		bool plural = mixGraphs.Count() > 1;
-		var files = mixGraphs.Select( mg => mg.FilePath ?? mg.UnchangedTitle );
+		var files = mixGraphs.Select( mg => mg.Asset?.AbsolutePath ?? mg.UnchangedTitle );
 
 		var warningLabel1 = new Label( this );
 		warningLabel1.Text = $"The following file{(plural ? "s" : "")} have unsaved changes:";

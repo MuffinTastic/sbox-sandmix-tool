@@ -24,7 +24,9 @@ public class MixGraphWidget : DockWidget
 	private MainWindow MainWindow => Parent as MainWindow;
 
 	internal GraphView GraphView => Widget as GraphView;
-	public string FilePath { get; private set; }
+
+	public Asset Asset { get; private set; } = null;
+	public MixGraphResource Resource { get; private set; } = null;
 
 	public bool Changed { get; private set; } = false;
 	public bool AttemptSave { get; private set; } = true;
@@ -75,9 +77,9 @@ public class MixGraphWidget : DockWidget
 	{
 		var title = $"{DefaultTitle} {NewGraphNumber}";
 
-		if ( !string.IsNullOrEmpty( FilePath ) )
+		if ( Asset is not null )
 		{
-			title = Path.GetFileName( FilePath );
+			title = Path.GetFileName( Asset.AbsolutePath );
 		}
 
 		UnchangedTitle = title;
@@ -88,19 +90,9 @@ public class MixGraphWidget : DockWidget
 		Title = title;
 	}
 
-	public void SetFilePath( string filePath )
-	{
-		FilePath = filePath;
-
-		if ( string.IsNullOrEmpty( Path.GetExtension( filePath ) ) )
-		{
-			FilePath += $".{SandMixTool.FileExtension}";
-		}
-	}
-
 	public void Save()
 	{
-		if ( string.IsNullOrEmpty( FilePath ) )
+		if ( Asset is null )
 		{
 			SaveAs();
 			return;
@@ -114,12 +106,12 @@ public class MixGraphWidget : DockWidget
 		var fd = new FileDialog( this );
 
 		fd.Title = $"Save As";
-		fd.SetNameFilter( SandMixTool.FileFilter );
+		fd.SetNameFilter( SandMixTool.SaveMixGraphFilter );
 		fd.SetFindFile();
 
 		if ( fd.Execute() )
 		{
-			SetFilePath( fd.SelectedFile );
+			Asset = AssetSystem.CreateResource( MixGraphResource.FileExtension, fd.SelectedFile );
 			WriteToDisk();
 		}
 	}
@@ -131,11 +123,15 @@ public class MixGraphWidget : DockWidget
 
 	public void ReadFromDisk( string filePath )
 	{
-		FilePath = filePath;
+		Asset = AssetSystem.FindByPath( filePath );
 
-		var json = File.ReadAllText( FilePath );
-		var graph = GraphContainer.Deserialize( json );
-		GraphView.Graph = graph;
+		if ( Asset.TryLoadResource<MixGraphResource>( out var resource ) )
+		{
+			if ( resource.JsonData is not null )
+			{
+				GraphView.Graph = GraphContainer.Deserialize( resource.JsonData );
+			}
+		}
 
 		Changed = false;
 		UpdateTitle();
@@ -143,12 +139,15 @@ public class MixGraphWidget : DockWidget
 
 	public void WriteToDisk()
 	{
-		if ( string.IsNullOrEmpty( FilePath ) )
+		if ( Asset is null )
 			return;
 
-		var data = GraphView.Graph.Serialize();
-		
-		File.WriteAllText( FilePath, data );
+		if ( Asset.TryLoadResource<MixGraphResource>( out var resource ) )
+		{
+			resource.JsonData = GraphView.Graph.Serialize();
+			Asset.SaveToDisk( resource );
+			Asset.Compile( full: false );
+		}
 
 		Changed = false;
 		UpdateTitle();

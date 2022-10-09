@@ -1,4 +1,5 @@
 ﻿using Sandbox;
+using Sandbox.Internal;
 using SandMix.Nodes;
 using SandMixTool.Dialogs;
 using SandMixTool.NodeGraph;
@@ -8,13 +9,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using Tools;
+using Tools.NodeEditor;
 
 namespace SandMixTool;
 
+[CanEdit( "asset:smix" )]
+[CanEdit( "asset:smixefct" )]
 [Tool( SandMixTool.ProjectName, "surround_sound", SandMixTool.ProjectTagline )]
-public class MainWindow : Window
+public class MainWindow : Window, IAssetEditor
 {
 	public static MainWindow Instance { get; private set; }
+
+	public bool CanOpenMultipleAssets => throw new NotImplementedException();
 
 	private InspectorWidget Inspector;
 	private PreviewWidget Preview;
@@ -36,11 +42,38 @@ public class MainWindow : Window
 
 	public MainWindow()
 	{
+		if ( Instance is not null )
+		{
+			Hide();
+			Close();
+
+			Instance.Focus();
+			return;
+		}
+
+		Instance = this;
+
 		Title = SandMixTool.ProjectName;
 		Size = new Vector2( 1920, 1080 );
 
 		CreateUI();
 		Show();
+
+		// created through toolbar button
+	}
+
+	public MainWindow( Widget parent = null ) : base( parent )
+	{
+		Close();
+
+		// created through inspector
+	}
+
+	public void AssetOpen( Asset asset )
+	{
+		Instance ??= new MainWindow();
+		Instance.OpenMixGraph( asset.AbsolutePath );
+		Instance.Focus();
 	}
 
 	public void BuildMenu()
@@ -54,7 +87,7 @@ public class MainWindow : Window
 			newMix.Shortcut = "Ctrl+N";
 
 			var openMix = file.AddOption( "Open" );
-			openMix.Triggered += () => OpenMixGraph();
+			openMix.Triggered += () => OpenMixGraphFromChooser();
 			openMix.Shortcut = "Ctrl+O";
 
 			file.AddSeparator();
@@ -116,6 +149,8 @@ public class MainWindow : Window
 
 	public void UpdateMenuBar()
 	{
+		if ( !IsValid ) return;
+
 		var mixGraphFocused = CurrentMixGraph is not null;
 		GraphSaveOption.Enabled = mixGraphFocused;
 		GraphSaveAsOption.Enabled = mixGraphFocused;
@@ -134,7 +169,6 @@ public class MainWindow : Window
 	{
 		//Clear();
 		CurrentMixGraph = null;
-		Instance = this;
 
 		NewFileHandle = new DockWidget( "", null, this );
 		Dock( NewFileHandle, DockArea.Left );
@@ -185,37 +219,52 @@ public class MainWindow : Window
 		return mixGraph;
 	}
 
-	public void OpenMixGraph()
+	public void OpenMixGraph( string path )
 	{
+		var openMixGraph = MixGraphs.Where( mg => mg.Asset?.AbsolutePath.ToLower() == path.ToLower() ).FirstOrDefault();
 
+		if ( openMixGraph is not null )
+		{
+			openMixGraph.Raise();
+			return;
+		}
+
+		var mixGraph = CurrentMixGraph;
+
+		Log.Info( $"DEBUG C {mixGraph}" ); 
+		Log.Info( $"DEBUG C C {mixGraph?.Changed}" );
+		Log.Info( $"DEBUG C A {mixGraph?.Asset}" );
+
+		if ( mixGraph is null || mixGraph.Changed || mixGraph.Asset is not null )
+			mixGraph = CreateMixGraph();
+
+		mixGraph.ReadFromDisk( path );
+
+		CurrentMixGraph = mixGraph;
+	}
+
+	public void OpenMixGraphFromChooser()
+	{
 		Raise();
 		var fd = new FileDialog( this );
 
 		fd.Title = $"Open";
-		fd.SetNameFilter( SandMixTool.FileFilter );
+		fd.SetNameFilter( SandMixTool.FindFileFilter );
 		fd.SetFindExistingFile();
 
 		if ( fd.Execute() )
 		{
-			var openMixGraph = MixGraphs.Where( mg => mg.FilePath == fd.SelectedFile ).FirstOrDefault();
-
-			if ( openMixGraph is not null )
-			{
-				openMixGraph.Raise();
-				return;
-			}
-
-			var mixGraph = CurrentMixGraph;
-
-			if ( mixGraph is null || mixGraph.Changed || !string.IsNullOrEmpty( mixGraph.FilePath ) )
-				mixGraph = CreateMixGraph();
-
-			mixGraph.ReadFromDisk( fd.SelectedFile );
+			OpenMixGraph( fd.SelectedFile );
 		}
 	}
 
 	protected override void OnClosed()
 	{
+		if ( Instance == this )
+		{
+			Instance = null;
+		}
+
 		var unsavedMixGraphs = MixGraphs.Where( mg => mg.Changed && mg.AttemptSave );
 
 		if ( unsavedMixGraphs.Count() == 0 )

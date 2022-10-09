@@ -32,8 +32,11 @@ public class GraphView : GraphicsView
 	public event Action<NodeUI, bool> NodeSelect;
 	public event Action GraphUpdated;
 
-	public GraphView( Widget parent ) : base( parent )
+	bool EffectGraph;
+
+	public GraphView( bool effectGraph, Widget parent ) : base( parent )
 	{
+		EffectGraph = effectGraph;
 		Antialiasing = true;
 		TextAntialiasing = true;
 		BilinearFiltering = true;
@@ -50,7 +53,7 @@ public class GraphView : GraphicsView
 		SetHandleConfig( typeof( bool ), new HandleConfig { Color = Color.Parse( "#b49dc9" ).Value, Icon = "b", Name = "Boolean" } );
 		SetHandleConfig( typeof( AudioSamples ), new HandleConfig { Color = Color.Parse( "#9dc2d5" ).Value, Icon = "a", Name = "Audio" } );
 
-		Graph = new GraphContainer();
+		Graph = new GraphContainer( effectGraph );
 	}
 
 	public override void OnDestroyed()
@@ -326,7 +329,7 @@ public class GraphView : GraphicsView
 		{
 			var undoState = new GraphChange();
 			undoState.Creation = true;
-			undoState.Graph = new GraphContainer();
+			undoState.Graph = new GraphContainer( EffectGraph );
 			undoState.Graph.Add( node.Node );
 			UndoStates.Push( undoState );
 			RedoStates.Clear();
@@ -354,7 +357,7 @@ public class GraphView : GraphicsView
 		{
 			var undoState = new GraphChange();
 			undoState.Creation = false;
-			undoState.Graph = new GraphContainer();
+			undoState.Graph = new GraphContainer( EffectGraph );
 			undoState.Graph.Add( node.Node );
 			UndoStates.Push( undoState );
 			RedoStates.Clear();
@@ -382,7 +385,7 @@ public class GraphView : GraphicsView
 		{
 			var undoState = new GraphChange();
 			undoState.Creation = true;
-			undoState.Graph = new GraphContainer();
+			undoState.Graph = new GraphContainer( EffectGraph );
 			undoState.Graph.Connect( nodeOutput.Identifier, dropTarget.Identifier );
 			UndoStates.Push( undoState );
 			RedoStates.Clear();
@@ -404,7 +407,7 @@ public class GraphView : GraphicsView
 		{
 			var undoState = new GraphChange();
 			undoState.Creation = false;
-			undoState.Graph = new GraphContainer();
+			undoState.Graph = new GraphContainer( EffectGraph );
 			undoState.Graph.Connect( connection.Output.Identifier, connection.Input.Identifier );
 			UndoStates.Push( undoState );
 			RedoStates.Clear();
@@ -643,7 +646,7 @@ public class GraphView : GraphicsView
 
 	public void OnGraphCopy()
 	{
-		var copyGraph = new GraphContainer();
+		var copyGraph = new GraphContainer( EffectGraph );
 
 		// Only nodes get selected so we'll have to find the connections ourselves
 		//                     But let's be sure V
@@ -675,6 +678,11 @@ public class GraphView : GraphicsView
 
 			if ( pasteGraph is not null )
 			{
+				if (pasteGraph.EffectGraph != EffectGraph)
+				{
+					return;
+				}
+
 				pasteGraph.RegenerateIdentifiers();
 				BuildFromGraph( pasteGraph, paste: true );
 				
@@ -684,7 +692,7 @@ public class GraphView : GraphicsView
 				UndoStates.Push( undoState );
 			}
 		}
-		catch ( JsonException ex )
+		catch ( Exception ex )
 		{
 			Log.Warning( $"Couldn't paste into mixgraph: {ex.Message}" );
 			Log.Warning( pasteJson );
@@ -697,7 +705,7 @@ public class GraphView : GraphicsView
 	{
 		var undoState = new GraphChange();
 		undoState.Creation = false;
-		undoState.Graph = new GraphContainer();
+		undoState.Graph = new GraphContainer( EffectGraph );
 		
 		foreach ( var node in SelectedItems.OfType<NodeUI>().ToList() )
 		{

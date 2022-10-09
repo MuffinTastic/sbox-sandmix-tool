@@ -18,7 +18,7 @@ public class SaveDialog : Dialog
 
 	public event Action<Result> Triggered;
 
-	public SaveDialog( IEnumerable<MixGraphWidget> mixGraphs, Widget parent = null ) : base( parent )
+	public SaveDialog( IEnumerable<NodeGraphWidget> mixGraphs, Widget parent = null ) : base( parent )
 	{
 		Window.Size = new Vector2( 400, 150 );
 		Window.IsDialog = true;
@@ -32,7 +32,7 @@ public class SaveDialog : Dialog
 		Show();
 	}
 
-	private void CreateUI( IEnumerable<MixGraphWidget> mixGraphs )
+	private void CreateUI( IEnumerable<NodeGraphWidget> mixGraphs )
 	{
 		SetLayout( LayoutMode.TopToBottom );
 		Layout.Margin = 10;

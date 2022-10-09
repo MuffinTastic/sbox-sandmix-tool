@@ -25,8 +25,8 @@ public class MainWindow : Window, IAssetEditor
 	private InspectorWidget Inspector;
 	private PreviewWidget Preview;
 
-	private MixGraphWidget CurrentMixGraph;
-	private List<MixGraphWidget> MixGraphs = new();
+	private NodeGraphWidget CurrentNodeGraph;
+	private List<NodeGraphWidget> NodeGraphs = new();
 
 	private DockWidget NewFileHandle;
 
@@ -72,7 +72,7 @@ public class MainWindow : Window, IAssetEditor
 	public void AssetOpen( Asset asset )
 	{
 		Instance ??= new MainWindow();
-		Instance.OpenMixGraph( asset.AbsolutePath );
+		Instance.OpenNodeGraph( asset.AbsolutePath );
 		Instance.Focus();
 	}
 
@@ -83,8 +83,11 @@ public class MainWindow : Window, IAssetEditor
 		var file = MenuBar.AddMenu( "File" );
 		{
 			var newMix = file.AddOption( "New" );
-			newMix.Triggered += () => CreateMixGraph();
+			newMix.Triggered += () => CreateNodeGraph();
 			newMix.Shortcut = "Ctrl+N";
+
+			var newaaMix = file.AddOption( "New Effect" );
+			newaaMix.Triggered += () => CreateNodeGraph( true );
 
 			var openMix = file.AddOption( "Open" );
 			openMix.Triggered += () => OpenMixGraphFromChooser();
@@ -92,11 +95,11 @@ public class MainWindow : Window, IAssetEditor
 
 			file.AddSeparator();
 
-			GraphSaveOption = new Option( title: "Save", icon: null, action: () => CurrentMixGraph?.Save() );
+			GraphSaveOption = new Option( title: "Save", icon: null, action: () => CurrentNodeGraph?.Save() );
 			GraphSaveOption.Shortcut = "Ctrl+S";
 			file.AddOption( GraphSaveOption );
 
-			GraphSaveAsOption = new Option( title: "Save As", icon: null, action: () => CurrentMixGraph?.SaveAs() );
+			GraphSaveAsOption = new Option( title: "Save As", icon: null, action: () => CurrentNodeGraph?.SaveAs() );
 			file.AddOption( GraphSaveAsOption );
 
 			file.AddSeparator();
@@ -106,29 +109,29 @@ public class MainWindow : Window, IAssetEditor
 
 		var edit = MenuBar.AddMenu( "Edit" );
 		{
-			GraphUndoOption = new Option( title: "Undo", icon: null, action: () => CurrentMixGraph?.GraphUndo() );
+			GraphUndoOption = new Option( title: "Undo", icon: null, action: () => CurrentNodeGraph?.GraphUndo() );
 			GraphUndoOption.Shortcut = "Ctrl+Z";
 			edit.AddOption( GraphUndoOption );
 
-			GraphRedoOption = new Option( title: "Redo", icon: null, action: () => CurrentMixGraph?.GraphRedo() );
+			GraphRedoOption = new Option( title: "Redo", icon: null, action: () => CurrentNodeGraph?.GraphRedo() );
 			GraphRedoOption.Shortcut = "Ctrl+Y";
 			edit.AddOption( GraphRedoOption );
 
 			edit.AddSeparator();
 
-			GraphCutOption = new Option( title: "Cut", icon: null, action: () => CurrentMixGraph?.GraphCut() );
+			GraphCutOption = new Option( title: "Cut", icon: null, action: () => CurrentNodeGraph?.GraphCut() );
 			GraphCutOption.Shortcut = "Ctrl+X";
 			edit.AddOption( GraphCutOption );
 
-			GraphCopyOption = new Option( title: "Copy", icon: null, action: () => CurrentMixGraph?.GraphCopy() );
+			GraphCopyOption = new Option( title: "Copy", icon: null, action: () => CurrentNodeGraph?.GraphCopy() );
 			GraphCopyOption.Shortcut = "Ctrl+C";
 			edit.AddOption( GraphCopyOption );
 
-			GraphPasteOption = new Option( title: "Paste", icon: null, action: () => CurrentMixGraph?.GraphPaste() );
+			GraphPasteOption = new Option( title: "Paste", icon: null, action: () => CurrentNodeGraph?.GraphPaste() );
 			GraphPasteOption.Shortcut = "Ctrl+V";
 			edit.AddOption( GraphPasteOption );
 
-			GraphDeleteOption = new Option( title: "Delete", icon: null, action: () => CurrentMixGraph?.GraphDelete() );
+			GraphDeleteOption = new Option( title: "Delete", icon: null, action: () => CurrentNodeGraph?.GraphDelete() );
 			GraphDeleteOption.Shortcut = "Del";
 			edit.AddOption( GraphDeleteOption );
 		}
@@ -151,14 +154,14 @@ public class MainWindow : Window, IAssetEditor
 	{
 		if ( !IsValid ) return;
 
-		var mixGraphFocused = CurrentMixGraph is not null;
+		var mixGraphFocused = CurrentNodeGraph is not null;
 		GraphSaveOption.Enabled = mixGraphFocused;
 		GraphSaveAsOption.Enabled = mixGraphFocused;
 
-		GraphUndoOption.Enabled = CurrentMixGraph?.GraphCanUndo() ?? false;
-		GraphRedoOption.Enabled = CurrentMixGraph?.GraphCanRedo() ?? false;
+		GraphUndoOption.Enabled = CurrentNodeGraph?.GraphCanUndo() ?? false;
+		GraphRedoOption.Enabled = CurrentNodeGraph?.GraphCanRedo() ?? false;
 
-		var hasSelection = CurrentMixGraph?.GraphHasSelection() ?? false;
+		var hasSelection = CurrentNodeGraph?.GraphHasSelection() ?? false;
 		GraphCutOption.Enabled = hasSelection;
 		GraphCopyOption.Enabled = hasSelection;
 		GraphPasteOption.Enabled = mixGraphFocused;
@@ -168,7 +171,7 @@ public class MainWindow : Window, IAssetEditor
 	public void CreateUI()
 	{
 		//Clear();
-		CurrentMixGraph = null;
+		CurrentNodeGraph = null;
 
 		NewFileHandle = new DockWidget( "", null, this );
 		Dock( NewFileHandle, DockArea.Left );
@@ -186,42 +189,46 @@ public class MainWindow : Window, IAssetEditor
 
 		BuildMenu();
 
-		CreateMixGraph();
+		CreateNodeGraph();
 	}
 
-	public MixGraphWidget CreateMixGraph()
+	public NodeGraphWidget CreateNodeGraph( bool effectGraph = false )
 	{
-		var mixGraph = new MixGraphWidget( this );
-		mixGraph.MixGraphFocus += OnMixGraphFocus;
-		mixGraph.MixGraphClose += OnMixGraphClose;
-		mixGraph.GraphView.GraphUpdated += UpdateMenuBar;
+		NodeGraphWidget nodeGraph;
+		if ( effectGraph )
+			nodeGraph = new EffectGraphWidget( this );
+		else
+			nodeGraph = new MixGraphWidget( this );
+		nodeGraph.NodeGraphFocus += OnMixGraphFocus;
+		nodeGraph.NodeGraphClose += OnMixGraphClose;
+		nodeGraph.GraphView.GraphUpdated += UpdateMenuBar;
 
 		if ( Inspector is not null )
-			mixGraph.GraphView.NodeSelect += Inspector.StartInspecting;
+			nodeGraph.GraphView.NodeSelect += Inspector.StartInspecting;
 		else
 			Log.Warning( "Inspector was null" );
 
 		//var lastOpened = Children.OfType<MixGraphWidget>().Where( mg => mg != mixGraph ).LastOrDefault();
 
 		//if ( lastOpened is not null )
-			DockInTab( NewFileHandle, mixGraph );
+			DockInTab( NewFileHandle, nodeGraph );
 		//else
 		//	Dock( mixGraph, DockArea.Left, null );
 
-		mixGraph.Show();
-		mixGraph.Raise();
+		nodeGraph.Show();
+		nodeGraph.Raise();
 
-		CurrentMixGraph = mixGraph;
-		MixGraphs.Add( mixGraph );
+		CurrentNodeGraph = nodeGraph;
+		NodeGraphs.Add( nodeGraph );
 
 		UpdateMenuBar();
 
-		return mixGraph;
+		return nodeGraph;
 	}
 
-	public void OpenMixGraph( string path )
+	public void OpenNodeGraph( string path )
 	{
-		var openMixGraph = MixGraphs.Where( mg => mg.Asset?.AbsolutePath.ToLower() == path.ToLower() ).FirstOrDefault();
+		var openMixGraph = NodeGraphs.Where( mg => mg.Asset?.AbsolutePath.ToLower() == path.ToLower() ).FirstOrDefault();
 
 		if ( openMixGraph is not null )
 		{
@@ -229,18 +236,20 @@ public class MainWindow : Window, IAssetEditor
 			return;
 		}
 
-		var mixGraph = CurrentMixGraph;
+		var mixGraph = CurrentNodeGraph;
 
 		Log.Info( $"DEBUG C {mixGraph}" ); 
 		Log.Info( $"DEBUG C C {mixGraph?.Changed}" );
 		Log.Info( $"DEBUG C A {mixGraph?.Asset}" );
 
-		if ( mixGraph is null || mixGraph.Changed || mixGraph.Asset is not null )
-			mixGraph = CreateMixGraph();
+		var asset = AssetSystem.FindByPath( path );
 
-		mixGraph.ReadFromDisk( path );
+		if ( mixGraph is null || mixGraph.Changed || mixGraph.Asset?.AssetType != asset.AssetType )
+			mixGraph = CreateNodeGraph();
 
-		CurrentMixGraph = mixGraph;
+		mixGraph.ReadFromAsset( asset );
+
+		CurrentNodeGraph = mixGraph;
 	}
 
 	public void OpenMixGraphFromChooser()
@@ -254,7 +263,7 @@ public class MainWindow : Window, IAssetEditor
 
 		if ( fd.Execute() )
 		{
-			OpenMixGraph( fd.SelectedFile );
+			OpenNodeGraph( fd.SelectedFile );
 		}
 	}
 
@@ -265,7 +274,7 @@ public class MainWindow : Window, IAssetEditor
 			Instance = null;
 		}
 
-		var unsavedMixGraphs = MixGraphs.Where( mg => mg.Changed && mg.AttemptSave );
+		var unsavedMixGraphs = NodeGraphs.Where( mg => mg.Changed && mg.AttemptSave );
 
 		if ( unsavedMixGraphs.Count() == 0 )
 		{
@@ -295,11 +304,11 @@ public class MainWindow : Window, IAssetEditor
 		};
 	}
 
-	public void OnMixGraphFocus( MixGraphWidget mixGraph )
+	public void OnMixGraphFocus( NodeGraphWidget mixGraph )
 	{
-		CurrentMixGraph = mixGraph;
+		CurrentNodeGraph = mixGraph;
 
-		var otherMixGraphs = MixGraphs.Where( mg => mg != mixGraph );
+		var otherMixGraphs = NodeGraphs.Where( mg => mg != mixGraph );
 		foreach ( var otherMixGraph in otherMixGraphs )
 		{
 			otherMixGraph.GraphView.UnfocusAllNodes();
@@ -308,12 +317,12 @@ public class MainWindow : Window, IAssetEditor
 		UpdateMenuBar();
 	}
 
-	public void OnMixGraphClose( MixGraphWidget mixGraph )
+	public void OnMixGraphClose( NodeGraphWidget mixGraph )
 	{
-		if ( mixGraph == CurrentMixGraph )
-			CurrentMixGraph = null;
+		if ( mixGraph == CurrentNodeGraph )
+			CurrentNodeGraph = null;
 
-		MixGraphs.Remove( mixGraph );
+		NodeGraphs.Remove( mixGraph );
 
 		UpdateMenuBar();
 	}

@@ -12,7 +12,7 @@
   "RootNamespace": "SandMixTool",
   "Metadata": {
     "Compiler": {
-      "RootNamespace": "Sandbox",
+      "RootNamespace": "SandMixTool",
       "DefineConstants": "SANDBOX;ADDON;DEBUG;SMIXTOOL",
       "NoWarn": "1701;1702;1591;"
     }

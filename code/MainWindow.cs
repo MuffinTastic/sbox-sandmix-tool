@@ -1,5 +1,6 @@
 ﻿using Sandbox;
 using Sandbox.Internal;
+using SandMix;
 using SandMix.Nodes;
 using SandMixTool.Dialogs;
 using SandMixTool.NodeGraph;
@@ -15,12 +16,30 @@ namespace SandMixTool;
 
 [CanEdit( "asset:smix" )]
 [CanEdit( "asset:smixefct" )]
-[Tool( SandMixTool.ProjectName, "surround_sound", SandMixTool.ProjectTagline )]
-public class MainWindow : Window, IAssetEditor
+public class DummyWindow : Window, IAssetEditor
 {
-	public static MainWindow Instance { get; private set; }
-
 	public bool CanOpenMultipleAssets => throw new NotImplementedException();
+
+	public DummyWindow( Widget parent = null ) : base( parent )
+	{
+		Close();
+
+		// created through inspector
+	}
+
+	public void AssetOpen( Asset asset )
+	{
+		MainWindow.Instance ??= new MainWindow( createMix: false );
+		MainWindow.Instance.OpenNodeGraph( asset.AbsolutePath );
+		MainWindow.Instance.Focus();
+	}
+}
+
+[Tool( SandMixTool.ProjectName, "surround_sound", SandMixTool.ProjectTagline )]
+public class MainWindow : Window
+{
+	public static MainWindow Instance { get; set; }
+
 
 	private InspectorWidget Inspector;
 	private PreviewWidget Preview;
@@ -40,7 +59,12 @@ public class MainWindow : Window, IAssetEditor
 	private Option GraphPasteOption;
 	private Option GraphDeleteOption;
 
-	public MainWindow()
+	public MainWindow() : this( createMix: true )
+	{
+
+	}
+
+	public MainWindow( bool createMix )
 	{
 		if ( Instance is not null )
 		{
@@ -56,24 +80,10 @@ public class MainWindow : Window, IAssetEditor
 		Title = SandMixTool.ProjectName;
 		Size = new Vector2( 1920, 1080 );
 
-		CreateUI();
+		CreateUI( createMix );
 		Show();
 
 		// created through toolbar button
-	}
-
-	public MainWindow( Widget parent = null ) : base( parent )
-	{
-		Close();
-
-		// created through inspector
-	}
-
-	public void AssetOpen( Asset asset )
-	{
-		Instance ??= new MainWindow();
-		Instance.OpenNodeGraph( asset.AbsolutePath );
-		Instance.Focus();
 	}
 
 	public void BuildMenu()
@@ -82,16 +92,17 @@ public class MainWindow : Window, IAssetEditor
 
 		var file = MenuBar.AddMenu( "File" );
 		{
-			var newMix = file.AddOption( "New" );
-			newMix.Triggered += () => CreateNodeGraph();
+			var newMix = file.AddOption( "New Mix" );
+			newMix.Triggered += () => CreateNodeGraph( MixGraphResource.FileExtension );
 			newMix.Shortcut = "Ctrl+N";
 
-			var newaaMix = file.AddOption( "New Effect" );
-			newaaMix.Triggered += () => CreateNodeGraph( true );
+			var newEffect = file.AddOption( "New Effect" );
+			newEffect.Triggered += () => CreateNodeGraph( EffectResource.FileExtension );
+			newEffect.Shortcut = "Ctrl+Shift+N";
 
-			var openMix = file.AddOption( "Open" );
-			openMix.Triggered += () => OpenMixGraphFromChooser();
-			openMix.Shortcut = "Ctrl+O";
+			var open = file.AddOption( "Open" );
+			open.Triggered += () => OpenMixGraphFromChooser();
+			open.Shortcut = "Ctrl+O";
 
 			file.AddSeparator();
 
@@ -154,9 +165,9 @@ public class MainWindow : Window, IAssetEditor
 	{
 		if ( !IsValid ) return;
 
-		var mixGraphFocused = CurrentNodeGraph is not null;
-		GraphSaveOption.Enabled = mixGraphFocused;
-		GraphSaveAsOption.Enabled = mixGraphFocused;
+		var nodeGraphFocused = CurrentNodeGraph is not null;
+		GraphSaveOption.Enabled = nodeGraphFocused;
+		GraphSaveAsOption.Enabled = nodeGraphFocused;
 
 		GraphUndoOption.Enabled = CurrentNodeGraph?.GraphCanUndo() ?? false;
 		GraphRedoOption.Enabled = CurrentNodeGraph?.GraphCanRedo() ?? false;
@@ -164,11 +175,11 @@ public class MainWindow : Window, IAssetEditor
 		var hasSelection = CurrentNodeGraph?.GraphHasSelection() ?? false;
 		GraphCutOption.Enabled = hasSelection;
 		GraphCopyOption.Enabled = hasSelection;
-		GraphPasteOption.Enabled = mixGraphFocused;
+		GraphPasteOption.Enabled = nodeGraphFocused;
 		GraphDeleteOption.Enabled = hasSelection;
 	}
 
-	public void CreateUI()
+	public void CreateUI( bool createMix )
 	{
 		//Clear();
 		CurrentNodeGraph = null;
@@ -189,16 +200,24 @@ public class MainWindow : Window, IAssetEditor
 
 		BuildMenu();
 
-		CreateNodeGraph();
+		if ( createMix )
+		{
+			CreateNodeGraph( MixGraphResource.FileExtension );
+		}
 	}
 
-	public NodeGraphWidget CreateNodeGraph( bool effectGraph = false )
+	public NodeGraphWidget CreateNodeGraph( string extension )
 	{
+
 		NodeGraphWidget nodeGraph;
-		if ( effectGraph )
-			nodeGraph = new EffectGraphWidget( this );
-		else
-			nodeGraph = new MixGraphWidget( this );
+
+		nodeGraph = extension switch
+		{
+			MixGraphResource.FileExtension => new MixGraphWidget( this ),
+			EffectResource.FileExtension => new EffectGraphWidget( this ),
+			_ => throw new NotImplementedException( extension )
+		};
+
 		nodeGraph.NodeGraphFocus += OnMixGraphFocus;
 		nodeGraph.NodeGraphClose += OnMixGraphClose;
 		nodeGraph.GraphView.GraphUpdated += UpdateMenuBar;
@@ -208,12 +227,7 @@ public class MainWindow : Window, IAssetEditor
 		else
 			Log.Warning( "Inspector was null" );
 
-		//var lastOpened = Children.OfType<MixGraphWidget>().Where( mg => mg != mixGraph ).LastOrDefault();
-
-		//if ( lastOpened is not null )
-			DockInTab( NewFileHandle, nodeGraph );
-		//else
-		//	Dock( mixGraph, DockArea.Left, null );
+		DockInTab( NewFileHandle, nodeGraph );
 
 		nodeGraph.Show();
 		nodeGraph.Raise();
@@ -236,20 +250,20 @@ public class MainWindow : Window, IAssetEditor
 			return;
 		}
 
-		var mixGraph = CurrentNodeGraph;
+		var nodeGraph = CurrentNodeGraph;
 
-		Log.Info( $"DEBUG C {mixGraph}" ); 
-		Log.Info( $"DEBUG C C {mixGraph?.Changed}" );
-		Log.Info( $"DEBUG C A {mixGraph?.Asset}" );
+		Log.Info( $"DEBUG C {nodeGraph}" ); 
+		Log.Info( $"DEBUG C C {nodeGraph?.Changed}" );
+		Log.Info( $"DEBUG C A {nodeGraph?.Asset}" );
 
 		var asset = AssetSystem.FindByPath( path );
 
-		if ( mixGraph is null || mixGraph.Changed || mixGraph.Asset?.AssetType != asset.AssetType )
-			mixGraph = CreateNodeGraph();
+		if ( nodeGraph is null || nodeGraph.Changed || nodeGraph.Asset?.AssetType != asset.AssetType )
+			nodeGraph = CreateNodeGraph( asset.AssetType.FileExtension );
 
-		mixGraph.ReadFromAsset( asset );
+		nodeGraph.ReadAsset( asset );
 
-		CurrentNodeGraph = mixGraph;
+		CurrentNodeGraph = nodeGraph;
 	}
 
 	public void OpenMixGraphFromChooser()

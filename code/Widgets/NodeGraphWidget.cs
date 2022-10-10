@@ -29,19 +29,19 @@ public abstract class NodeGraphWidget : DockWidget
 	public event Action<NodeGraphWidget> NodeGraphFocus;
 	public event Action<NodeGraphWidget> NodeGraphClose;
 
-	public NodeGraphWidget( bool effectGraph, string defaultTitle, string icon, Widget parent = null ) : base( defaultTitle, icon, parent )
+	public NodeGraphWidget( GraphType graphType, string defaultTitle, string icon, Widget parent = null ) : base( defaultTitle, icon, parent )
 	{
 		DefaultTitle = defaultTitle;
 		UnchangedTitle = DefaultTitle;
 
 		DeleteOnClose = true;
 
-		CreateUI( effectGraph );
+		CreateUI( graphType );
 	}
 
-	private void CreateUI( bool effectGraph )
+	private void CreateUI( GraphType graphType )
 	{
-		Widget = new GraphView( effectGraph, this );
+		Widget = new GraphView( graphType, this );
 
 		AddNodeTypes();
 
@@ -94,7 +94,7 @@ public abstract class NodeGraphWidget : DockWidget
 			return;
 		}
 
-		WriteToDisk();
+		WriteAsset();
 	}
 
 	public void SaveAs()
@@ -107,8 +107,8 @@ public abstract class NodeGraphWidget : DockWidget
 
 		if ( fd.Execute() )
 		{
-			Asset = AssetSystem.CreateResource( MixGraphResource.FileExtension, fd.SelectedFile );
-			WriteToDisk();
+			Asset = AssetSystem.CreateResource( FileExtension, fd.SelectedFile );
+			WriteAsset();
 		}
 	}
 
@@ -117,37 +117,30 @@ public abstract class NodeGraphWidget : DockWidget
 		AttemptSave = false;
 	}
 
-	public void ReadFromAsset( Asset asset )
+	public void ReadAsset( Asset asset )
 	{
 		Asset = asset;
 
-		if ( Asset.TryLoadResource<MixGraphResource>( out var resource ) )
-		{
-			if ( resource.JsonData is not null )
-			{
-				GraphView.Graph = GraphContainer.Deserialize( resource.JsonData );
-			}
-		}
+		ReadAssetImpl();
 
 		Changed = false;
 		UpdateTitle();
 	}
 
-	public void WriteToDisk()
+	protected abstract void ReadAssetImpl();
+
+	public void WriteAsset()
 	{
 		if ( Asset is null )
 			return;
 
-		if ( Asset.TryLoadResource<MixGraphResource>( out var resource ) )
-		{
-			resource.JsonData = GraphView.Graph.Serialize();
-			Asset.SaveToDisk( resource );
-			Asset.Compile( full: false );
-		}
+		WriteAssetImpl();
 
 		Changed = false;
 		UpdateTitle();
 	}
+
+	protected abstract void WriteAssetImpl();
 
 	protected override void OnVisibilityChanged( bool visible )
 	{

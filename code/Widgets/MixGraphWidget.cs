@@ -1,5 +1,6 @@
 ﻿using Sandbox;
 using SandMix;
+using SandMix.Nodes;
 using SandMix.Nodes.Mix;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,10 +15,31 @@ public class MixGraphWidget : NodeGraphWidget
 	public override string FileExtension => MixGraphResource.FileExtension;
 	public override string SaveFilter => SandMixTool.SaveMixGraphFilter;
 
-	public MixGraphWidget( Widget parent = null ) : base( effectGraph: false, "New Mix Graph", MixGraphResource.Icon, parent )
+	public MixGraphWidget( Widget parent = null ) : base( GraphType.Mix, "New Mix Graph", MixGraphResource.Icon, parent )
 	{
 		NewMixGraphNumber++;
 	}
 
 	protected override IEnumerable<TypeDescription> NodeTypes => TypeLibrary.GetDescriptions<BaseMixNode>().Where( td => !td.IsAbstract );
+
+	protected override void ReadAssetImpl()
+	{
+		if ( Asset.TryLoadResource<MixGraphResource>( out var resource ) )
+		{
+			if ( resource.JsonData is not null )
+			{
+				GraphView.Graph = GraphContainer.Deserialize( resource.JsonData );
+			}
+		}
+	}
+
+	protected override void WriteAssetImpl()
+	{
+		if ( Asset.TryLoadResource<MixGraphResource>( out var resource ) )
+		{
+			resource.JsonData = GraphView.Graph.Serialize();
+			Asset.SaveToDisk( resource );
+			Asset.Compile( full: false );
+		}
+	}
 }

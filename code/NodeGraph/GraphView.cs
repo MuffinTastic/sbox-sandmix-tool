@@ -4,7 +4,6 @@ using SandMix.Nodes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
 using Tools;
 
 namespace SandMixTool.NodeGraph;
@@ -32,11 +31,8 @@ public class GraphView : GraphicsView
 	public event Action<NodeUI, bool> NodeSelect;
 	public event Action GraphUpdated;
 
-	bool EffectGraph;
-
-	public GraphView( bool effectGraph, Widget parent ) : base( parent )
+	public GraphView( GraphType graphType, Widget parent ) : base( parent )
 	{
-		EffectGraph = effectGraph;
 		Antialiasing = true;
 		TextAntialiasing = true;
 		BilinearFiltering = true;
@@ -53,7 +49,7 @@ public class GraphView : GraphicsView
 		SetHandleConfig( typeof( bool ), new HandleConfig { Color = Color.Parse( "#b49dc9" ).Value, Icon = "b", Name = "Boolean" } );
 		SetHandleConfig( typeof( AudioSamples ), new HandleConfig { Color = Color.Parse( "#9dc2d5" ).Value, Icon = "a", Name = "Audio" } );
 
-		Graph = new GraphContainer( effectGraph );
+		Graph = new GraphContainer( graphType );
 	}
 
 	public override void OnDestroyed()
@@ -329,7 +325,7 @@ public class GraphView : GraphicsView
 		{
 			var undoState = new GraphChange();
 			undoState.Creation = true;
-			undoState.Graph = new GraphContainer( EffectGraph );
+			undoState.Graph = new GraphContainer( Graph.GraphType );
 			undoState.Graph.Add( node.Node );
 			UndoStates.Push( undoState );
 			RedoStates.Clear();
@@ -357,7 +353,7 @@ public class GraphView : GraphicsView
 		{
 			var undoState = new GraphChange();
 			undoState.Creation = false;
-			undoState.Graph = new GraphContainer( EffectGraph );
+			undoState.Graph = new GraphContainer( Graph.GraphType );
 			undoState.Graph.Add( node.Node );
 			UndoStates.Push( undoState );
 			RedoStates.Clear();
@@ -385,7 +381,7 @@ public class GraphView : GraphicsView
 		{
 			var undoState = new GraphChange();
 			undoState.Creation = true;
-			undoState.Graph = new GraphContainer( EffectGraph );
+			undoState.Graph = new GraphContainer( Graph.GraphType );
 			undoState.Graph.Connect( nodeOutput.Identifier, dropTarget.Identifier );
 			UndoStates.Push( undoState );
 			RedoStates.Clear();
@@ -407,7 +403,7 @@ public class GraphView : GraphicsView
 		{
 			var undoState = new GraphChange();
 			undoState.Creation = false;
-			undoState.Graph = new GraphContainer( EffectGraph );
+			undoState.Graph = new GraphContainer( Graph.GraphType );
 			undoState.Graph.Connect( connection.Output.Identifier, connection.Input.Identifier );
 			UndoStates.Push( undoState );
 			RedoStates.Clear();
@@ -547,18 +543,18 @@ public class GraphView : GraphicsView
 		};
 	}
 
-	public PlugOut FindPlugOut( string name )
+	public PlugOut FindPlugOut( string id )
 	{
-		var split = name.Split( '.', 2 );
-		var node = Items.OfType<NodeUI>().FirstOrDefault( x => x.Node.IsNamed( split[0] ) );
+		var split = id.Split( '.', 2 );
+		var node = Items.OfType<NodeUI>().FirstOrDefault( x => x.Node.HasIdentifier( split[0] ) );
 		if ( node == null ) return null;
 		return node.Outputs.FirstOrDefault( x => x.IsNamed( split[1] ) );
 	}
 
-	public PlugIn FindPlugIn( string name )
+	public PlugIn FindPlugIn( string id )
 	{
-		var split = name.Split( '.', 2 );
-		var node = Items.OfType<NodeUI>().FirstOrDefault( x => x.Node.IsNamed( split[0] ) );
+		var split = id.Split( '.', 2 );
+		var node = Items.OfType<NodeUI>().FirstOrDefault( x => x.Node.HasIdentifier( split[0] ) );
 		if ( node == null ) return null;
 		return node.Inputs.FirstOrDefault( x => x.IsNamed( split[1] ) );
 	}
@@ -646,7 +642,7 @@ public class GraphView : GraphicsView
 
 	public void OnGraphCopy()
 	{
-		var copyGraph = new GraphContainer( EffectGraph );
+		var copyGraph = new GraphContainer( Graph.GraphType );
 
 		// Only nodes get selected so we'll have to find the connections ourselves
 		//                     But let's be sure V
@@ -678,7 +674,7 @@ public class GraphView : GraphicsView
 
 			if ( pasteGraph is not null )
 			{
-				if (pasteGraph.EffectGraph != EffectGraph)
+				if (pasteGraph.GraphType != Graph.GraphType)
 				{
 					return;
 				}
@@ -705,7 +701,7 @@ public class GraphView : GraphicsView
 	{
 		var undoState = new GraphChange();
 		undoState.Creation = false;
-		undoState.Graph = new GraphContainer( EffectGraph );
+		undoState.Graph = new GraphContainer( Graph.GraphType );
 		
 		foreach ( var node in SelectedItems.OfType<NodeUI>().ToList() )
 		{

@@ -314,4 +314,9 @@ public class FileWidget : DockWidget
 	{
 		GraphView?.GraphDelete();
 	}
+
+	public void RecenterView()
+	{
+		GraphView?.ResetViewport();
+	}
 }

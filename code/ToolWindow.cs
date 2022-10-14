@@ -33,6 +33,7 @@ public class ToolWindow : Window, IAssetEditor
 		public Option EditDeleteOption;
 
 		public Option ViewPreviewOption;
+		public Option RecenterViewOption;
 	}
 
 	private MenuBarOptions MenuOptions;
@@ -130,6 +131,11 @@ public class ToolWindow : Window, IAssetEditor
 			view.AddOption( MenuOptions.ViewPreviewOption );
 
 			view.AddOption( Inspector.GetToggleViewOption() );
+
+			view.AddSeparator();
+
+			MenuOptions.RecenterViewOption = new Option( title: "Recenter Graph View", icon: null, action: () => File.RecenterView() );
+			view.AddOption( MenuOptions.RecenterViewOption );
 		}
 
 		var help = MenuBar.AddMenu( "Help" );

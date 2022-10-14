@@ -219,19 +219,17 @@ public class GraphView : GraphicsView
 		{
 			for ( float x = ((area.Left - offset.x) / GridSize).Floor() * GridSize + offset.x; x < area.Right; x += GridSize )
 			{
-				Paint.DrawLine( new Vector2[]
-				{
-				FromScene( new Vector2( x, area.Top ) ),
-				FromScene( new Vector2( x, area.Bottom ) ),
+				Paint.DrawLine( new Vector2[] {
+					FromScene( new Vector2( x, area.Top ) ),
+					FromScene( new Vector2( x, area.Bottom ) ),
 				} );
 			}
 
 			for ( float y = ((area.Top - offset.y) / GridSize).Floor() * GridSize + offset.y; y < area.Bottom; y += GridSize )
 			{
-				Paint.DrawLine( new Vector2[]
-				{
-				FromScene( new Vector2( area.Left, y ) ),
-				FromScene( new Vector2( area.Right, y ) ),
+				Paint.DrawLine( new Vector2[] {
+					FromScene( new Vector2( area.Left, y ) ),
+					FromScene( new Vector2( area.Right, y ) ),
 				} );
 			}
 		}

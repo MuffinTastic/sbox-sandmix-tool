@@ -16,6 +16,6 @@ public static class SandMixTool
 	public const string SaveMixGraphFilter = $"{ProjectName} mixgraph (*.{MixGraphFileExtension});;All files (*.*)";
 	public const string SaveEffectFilter = $"{ProjectName} effect (*.{EffectFileExtension});;All files (*.*)";
 
-	[ConVar.Engine( "smix_debug_tool" )]
+	[ConVar.Engine( "smix_tool_debug" )]
 	public static bool Debug { get; set; } = false;
 }

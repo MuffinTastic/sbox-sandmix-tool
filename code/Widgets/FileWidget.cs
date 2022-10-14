@@ -48,7 +48,12 @@ public class FileWidget : DockWidget
 	{
 		var window = Parent as ToolWindow;
 
-		if ( Graph is null )
+		if ( !window.IsValid )
+		{
+			return;
+		}
+
+		if ( !FileIsOpen )
 		{
 			SetIcon( SandMixTool.BaseIcon );
 			window.ResetWindowIcon();
@@ -91,7 +96,12 @@ public class FileWidget : DockWidget
 
 	private void UpdateMenuBar()
 	{
-		var fileOpen = GraphView is not null;
+		if ( !Parent.IsValid )
+		{
+			return;
+		}
+
+		var fileOpen = FileIsOpen;
 		MenuOptions.FileCloseOption.Enabled = fileOpen;
 		MenuOptions.FileSaveOption.Enabled = fileOpen;
 		MenuOptions.FileSaveAsOption.Enabled = fileOpen;
@@ -145,6 +155,8 @@ public class FileWidget : DockWidget
 		UnsavedChanges = false;
 		UpdateWindowDressing();
 	}
+
+	public bool FileIsOpen => Graph is not null;
 
 	public async Task FileNew( GraphType graphType )
 	{
@@ -204,9 +216,9 @@ public class FileWidget : DockWidget
 
 	public async Task<bool> FileClose()
 	{
-		if ( UnsavedChanges )
+		if ( FileIsOpen && UnsavedChanges )
 		{
-			var result = await SaveDialog.Run( Parent );
+			var result = await SaveDialog.RunAsync( Parent );
 
 			switch ( result )
 			{

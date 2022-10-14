@@ -71,7 +71,7 @@ public class SaveDialog : Dialog
 		Close();
 	}
 
-	public static Task<Result> Run( Widget parent = null )
+	public static Task<Result> RunAsync( Widget parent = null )
 	{
 		TaskCompletionSource<Result> tcs = new TaskCompletionSource<Result>();
 		var dialog = new SaveDialog( parent );

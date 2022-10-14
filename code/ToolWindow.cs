@@ -4,6 +4,7 @@ using SandMix;
 using SandMix.Nodes;
 using SandMix.Tool.Widgets;
 using System.Runtime;
+using System.Threading.Tasks;
 
 namespace SandMix.Tool;
 
@@ -216,137 +217,26 @@ public class ToolWindow : Window, IAssetEditor
 		SetWindowTitle( null );
 	}
 
-
-
-	/*
-	public NodeGraphWidget CreateNodeGraph( string extension )
-	{
-
-		NodeGraphWidget nodeGraph;
-
-		nodeGraph = extension switch
-		{
-			MixGraphResource.FileExtension => new MixGraphWidget( this ),
-			EffectResource.FileExtension => new EffectGraphWidget( this ),
-			_ => throw new NotImplementedException( extension )
-		};
-
-		nodeGraph.NodeGraphFocus += OnMixGraphFocus;
-		nodeGraph.NodeGraphClose += OnMixGraphClose;
-		nodeGraph.GraphView.GraphUpdated += UpdateMenuBar;
-
-		if ( Inspector is not null )
-			nodeGraph.GraphView.NodeSelect += Inspector.StartInspecting;
-		else
-			Log.Warning( "Inspector was null" );
-
-		DockInTab( NewFileHandle, nodeGraph );
-
-		nodeGraph.Show();
-		nodeGraph.Raise();
-
-		CurrentNodeGraph = nodeGraph;
-		NodeGraphs.Add( nodeGraph );
-
-		UpdateMenuBar();
-
-		return nodeGraph;
-	}
-
-	public void OpenNodeGraph( string path )
-	{
-		var openMixGraph = NodeGraphs.Where( mg => mg.Asset?.AbsolutePath.ToLower() == path.ToLower() ).FirstOrDefault();
-
-		if ( openMixGraph is not null )
-		{
-			openMixGraph.Raise();
-			return;
-		}
-
-		var nodeGraph = CurrentNodeGraph;
-
-		Log.Info( $"DEBUG C {nodeGraph}" ); 
-		Log.Info( $"DEBUG C C {nodeGraph?.Changed}" );
-		Log.Info( $"DEBUG C A {nodeGraph?.Asset}" );
-
-		var asset = AssetSystem.FindByPath( path );
-
-		if ( nodeGraph is null || nodeGraph.Changed || nodeGraph.Asset?.AssetType != asset.AssetType )
-			nodeGraph = CreateNodeGraph( asset.AssetType.FileExtension );
-
-		nodeGraph.ReadAsset( asset );
-
-		CurrentNodeGraph = nodeGraph;
-	}
-
-	public void OpenMixGraphFromChooser()
-	{
-		Raise();
-		var fd = new FileDialog( this );
-
-		fd.Title = $"Open";
-		fd.SetNameFilter( SandMixTool.FindFileFilter );
-		fd.SetFindExistingFile();
-
-		if ( fd.Execute() )
-		{
-			OpenNodeGraph( fd.SelectedFile );
-		}
-	}
-
+	// FIXME: This won't ever work properly until the CloseEvent parameter is added back
 	protected override void OnClosed()
 	{
-		var unsavedMixGraphs = NodeGraphs.Where( mg => mg.Changed && mg.AttemptSave );
-
-		if ( unsavedMixGraphs.Count() == 0 )
+		if ( File is null )
 		{
+			// Don't see why this should ever happen, but just in case
+			// e.Accept();
 			return;
 		}
 
-		var closeConfirm = new SaveDialog( unsavedMixGraphs, this );
-		closeConfirm.Triggered += ( result ) =>
+		async Task AsyncClose()
 		{
-			if ( result == SaveDialog.Result.Cancel )
-				return;
-
-			foreach ( var mixGraph in unsavedMixGraphs )
+			if ( !await File.FileClose() )
 			{
-				switch ( result )
-				{
-					case SaveDialog.Result.Yes:
-						mixGraph.Save();
-						break;
-					case SaveDialog.Result.No:
-						mixGraph.DontAttemptSave();
-						break;
-				}
+				// e.Ignore();
 			}
 
-			Close();
-		};
-	}
-
-	public void OnMixGraphFocus( NodeGraphWidget mixGraph )
-	{
-		CurrentNodeGraph = mixGraph;
-
-		var otherMixGraphs = NodeGraphs.Where( mg => mg != mixGraph );
-		foreach ( var otherMixGraph in otherMixGraphs )
-		{
-			otherMixGraph.GraphView.UnfocusAllNodes();
+			// e.Accept();
 		}
 
-		UpdateMenuBar();
+		_ = AsyncClose();
 	}
-
-	public void OnMixGraphClose( NodeGraphWidget mixGraph )
-	{
-		if ( mixGraph == CurrentNodeGraph )
-			CurrentNodeGraph = null;
-
-		NodeGraphs.Remove( mixGraph );
-
-		UpdateMenuBar();
-	}
-	*/
 }

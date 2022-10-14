@@ -554,14 +554,14 @@ public class GraphView : GraphicsView
 		BuildFromGraph( _graph );
 	}
 
-	public void SetHandleConfig( System.Type t, HandleConfig config )
+	public void SetHandleConfig( Type t, HandleConfig config )
 	{
 		handles[t] = config;
 	}
 
-	Dictionary<System.Type, HandleConfig> handles = new();
+	Dictionary<Type, HandleConfig> handles = new();
 
-	public HandleConfig GetHandleConfig( System.Type t )
+	public HandleConfig GetHandleConfig( Type t )
 	{
 		if ( handles.TryGetValue( t, out HandleConfig config ) )
 			return config;

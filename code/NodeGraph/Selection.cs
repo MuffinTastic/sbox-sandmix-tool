@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using Tools;
 
-namespace SandMixTool.NodeGraph;
+namespace SandMix.Tool.NodeGraph;
 
-public partial class Selection : Tools.GraphicsItem
+public partial class Selection : GraphicsItem
 {
 	public static readonly Vector2 DrawPadding = new Vector2( 50.0f );
 	public Color PrimaryColor = Color.Parse( "#93b4d6" ) ?? default;

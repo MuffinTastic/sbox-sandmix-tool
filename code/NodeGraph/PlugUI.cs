@@ -1,15 +1,16 @@
-﻿using Tools;
+﻿using System.Reflection;
+using Tools;
 
-namespace SandMixTool.NodeGraph;
+namespace SandMix.Tool.NodeGraph;
 
-public class PlugUI : Tools.GraphicsItem
+public class PlugUI : GraphicsItem
 {
 	public const float HandleSize = 14;
 
 	public NodeUI Node { get; protected set; }
 
 	public string Title = "Unnamed Title";
-	public System.Reflection.PropertyInfo Property;
+	public PropertyInfo Property;
 
 	public string Identifier => $"{Node.Node.Identifier}.{Property.Name}";
 
@@ -20,7 +21,7 @@ public class PlugUI : Tools.GraphicsItem
 #pragma warning restore CS0114
 	public virtual Vector2 HandleCenter => HandlePosition + HandleSize / 2;
 
-	public PlugUI( NodeUI node, System.Reflection.PropertyInfo property )
+	public PlugUI( NodeUI node, PropertyInfo property )
 	{
 		Size = new Vector2( 24, 24 );
 		Node = node;

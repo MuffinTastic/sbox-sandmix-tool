@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using Sandbox;
 
-using SandMixTool.NodeGraph;
+using SandMix.Tool.NodeGraph;
 
-namespace SandMixTool.Widgets;
+namespace SandMix.Tool.Widgets;
 
 public class InspectorWidget : DockWidget
 {

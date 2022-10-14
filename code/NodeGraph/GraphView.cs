@@ -1,12 +1,13 @@
-﻿using Sandbox;
-using SandMix;
-using SandMix.Nodes;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Sandbox;
 using Tools;
+using SandMix.Nodes;
+using SandMix.Nodes.Mix;
+using SandMix.Nodes.Effects;
 
-namespace SandMixTool.NodeGraph;
+namespace SandMix.Tool.NodeGraph;
 
 public class GraphView : GraphicsView
 {
@@ -31,8 +32,10 @@ public class GraphView : GraphicsView
 	public event Action<NodeUI, bool> NodeSelect;
 	public event Action GraphUpdated;
 
-	public GraphView( GraphType graphType, Widget parent ) : base( parent )
+	public GraphView( GraphContainer graph, Widget parent ) : base( parent )
 	{
+		Assert.NotNull( graph );
+
 		Antialiasing = true;
 		TextAntialiasing = true;
 		BilinearFiltering = true;
@@ -49,7 +52,33 @@ public class GraphView : GraphicsView
 		SetHandleConfig( typeof( bool ), new HandleConfig { Color = Color.Parse( "#b49dc9" ).Value, Icon = "b", Name = "Boolean" } );
 		SetHandleConfig( typeof( float[][] ), new HandleConfig { Color = Color.Parse( "#9dc2d5" ).Value, Icon = "a", Name = "Audio" } );
 
-		Graph = new GraphContainer( graphType );
+		Graph = graph;
+
+		SetupNodeList();
+
+		Show();
+	}
+
+	[Event.Hotload]
+	private void SetupNodeList()
+	{
+		ClearNodeTypes();
+
+		var baseNodeType = Graph.GraphType switch
+		{
+			GraphType.Mix => typeof( BaseMixNode ),
+			GraphType.Effect => typeof( BaseEffectNode ),
+			_ => throw new Exception( "Unknown graph type" )
+		};
+
+		var descriptions =
+			TypeLibrary.GetDescriptions( baseNodeType )
+			.Where( td => !td.IsAbstract );
+
+		foreach ( var nodeType in descriptions )
+		{
+			AddNodeType( nodeType.TargetType );
+		}
 	}
 
 	public override void OnDestroyed()
@@ -167,7 +196,7 @@ public class GraphView : GraphicsView
 		{
 			menu.AddSeparator();
 			var action = menu.AddOption( "Delete selection" );
-			action.Triggered = OnGraphDelete;
+			action.Triggered = GraphDelete;
 		}
 
 		menu.OpenAt( e.ScreenPosition );
@@ -207,14 +236,11 @@ public class GraphView : GraphicsView
 	{
 		base.OnMousePress( e );
 
-		if ( NodeSelect == null )
-			return;
-
 		var item = GetItemAt( ToScene( e.LocalPosition ) );
 		var node = item as NodeUI;
 		node ??= (item as PlugUI)?.Node;
 
-		NodeSelect( node, node is not null );
+		NodeSelect?.Invoke( node, node is not null );
 		lastInspected = node;
 
 		if ( item is null && e.LeftMouseButton )
@@ -432,7 +458,7 @@ public class GraphView : GraphicsView
 
 	public void CallGraphUpdated()
 	{
-		GraphUpdated();
+		GraphUpdated?.Invoke();
 	}
 
 	Rect GetVisibleArea()
@@ -604,7 +630,7 @@ public class GraphView : GraphicsView
 		}
 	}
 
-	public void OnGraphUndo()
+	public void GraphUndo()
 	{
 		if ( !CanUndo() )
 			return;
@@ -621,7 +647,7 @@ public class GraphView : GraphicsView
 		Focus();
 	}
 
-	public void OnGraphRedo()
+	public void GraphRedo()
 	{
 		if ( !CanRedo() )
 			return;
@@ -638,14 +664,14 @@ public class GraphView : GraphicsView
 		Focus();
 	}
 
-	public void OnGraphCut()
+	public void GraphCut()
 	{
-		OnGraphCopy();
-		OnGraphDelete();
+		GraphCopy();
+		GraphDelete();
 		Focus();
 	}
 
-	public void OnGraphCopy()
+	public void GraphCopy()
 	{
 		var copyGraph = new GraphContainer( Graph.GraphType );
 
@@ -669,7 +695,7 @@ public class GraphView : GraphicsView
 		Focus();
 	}
 
-	public void OnGraphPaste()
+	public void GraphPaste()
 	{
 		var pasteJson = Clipboard.Paste();
 		
@@ -702,7 +728,7 @@ public class GraphView : GraphicsView
 		Focus();
 	}
 
-	public void OnGraphDelete()
+	public void GraphDelete()
 	{
 		var undoState = new GraphChange();
 		undoState.Creation = false;
@@ -711,7 +737,7 @@ public class GraphView : GraphicsView
 		foreach ( var node in SelectedItems.OfType<NodeUI>().ToList() )
 		{
 			if ( node == lastInspected )
-				NodeSelect( null, false );
+				NodeSelect?.Invoke( null, false );
 
 			undoState.Graph.Add( node.Node );
 

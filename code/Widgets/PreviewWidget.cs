@@ -1,8 +1,8 @@
-﻿using SandMixTool.NodeGraph;
-using System;
+﻿using System;
 using Tools;
+using SandMix.Tool.NodeGraph;
 
-namespace SandMixTool.Widgets;
+namespace SandMix.Tool.Widgets;
 
 public class PreviewWidget : DockWidget
 {

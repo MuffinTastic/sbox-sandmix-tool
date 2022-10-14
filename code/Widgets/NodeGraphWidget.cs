@@ -1,15 +1,13 @@
-﻿using Sandbox;
-using SandMix;
-using SandMix.Nodes;
-using SandMixTool.Dialogs;
-using SandMixTool.NodeGraph;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using Tools;
+using Sandbox;
+using SandMix.Nodes;
+using SandMix.Tool.Dialogs;
+using SandMix.Tool.NodeGraph;
 
-namespace SandMixTool.Widgets;
+namespace SandMix.Tool.Widgets;
 
 public abstract class NodeGraphWidget : DockWidget
 {
@@ -41,7 +39,7 @@ public abstract class NodeGraphWidget : DockWidget
 
 	private void CreateUI( GraphType graphType )
 	{
-		Widget = new GraphView( graphType, this );
+		// Widget = new GraphView( graphType, this );
 
 		AddNodeTypes();
 
@@ -153,7 +151,7 @@ public abstract class NodeGraphWidget : DockWidget
 			return;
 		}
 
-		var prompt = new SaveDialog( new[] { this } );
+		/*var prompt = new SaveDialog( new[] { this } );
 		prompt.Triggered += ( result ) =>
 		{
 			switch ( result )
@@ -172,6 +170,7 @@ public abstract class NodeGraphWidget : DockWidget
 		};
 
 		prompt.Show();
+		*/
 
 		Show();
 	}
@@ -186,32 +185,32 @@ public abstract class NodeGraphWidget : DockWidget
 
 	public void GraphUndo()
 	{
-		GraphView.OnGraphUndo();
+		GraphView.GraphUndo();
 	}
 
 	public void GraphRedo()
 	{
-		GraphView.OnGraphRedo();
+		GraphView.GraphRedo();
 	}
 
 	public void GraphCut()
 	{
-		GraphView.OnGraphCut();
+		GraphView.GraphCut();
 	}
 
 	public void GraphCopy()
 	{
-		GraphView.OnGraphCopy();
+		GraphView.GraphCopy();
 	}
 
 	public void GraphPaste()
 	{
-		GraphView.OnGraphPaste();
+		GraphView.GraphPaste();
 	}
 
 	internal void GraphDelete()
 	{
-		GraphView.OnGraphDelete();
+		GraphView.GraphDelete();
 	}
 
 	public bool GraphCanUndo()

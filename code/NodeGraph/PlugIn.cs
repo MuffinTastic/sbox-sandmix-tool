@@ -1,7 +1,7 @@
-﻿using SandMix.Nodes;
-using Tools;
+﻿using Tools;
+using SandMix.Nodes;
 
-namespace SandMixTool.NodeGraph;
+namespace SandMix.Tool.NodeGraph;
 
 public class PlugIn : PlugUI
 {

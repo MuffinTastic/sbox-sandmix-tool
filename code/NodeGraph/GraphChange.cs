@@ -1,6 +1,6 @@
 ﻿using SandMix.Nodes;
 
-namespace SandMixTool.NodeGraph;
+namespace SandMix.Tool.NodeGraph;
 
 public struct GraphChange
 {

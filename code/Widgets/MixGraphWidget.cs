@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Tools;
 
-namespace SandMixTool.Widgets;
+namespace SandMix.Tool.Widgets;
 
 public class MixGraphWidget : NodeGraphWidget
 {

@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Text;
 using Tools;
 
-namespace SandMixTool.NodeGraph;
+namespace SandMix.Tool.NodeGraph;
 
 public partial class NodeUI : Tools.GraphicsItem
 {

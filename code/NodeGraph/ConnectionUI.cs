@@ -1,8 +1,8 @@
 ﻿using Tools;
 
-namespace SandMixTool.NodeGraph;
+namespace SandMix.Tool.NodeGraph;
 
-public class ConnectionUI : Tools.GraphicsLine
+public class ConnectionUI : GraphicsLine
 {
 	public PlugOut Output { get; protected set; }
 	public PlugIn Input { get; protected set; }

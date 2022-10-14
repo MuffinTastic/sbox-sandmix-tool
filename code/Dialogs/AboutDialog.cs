@@ -1,6 +1,6 @@
 ﻿using Tools;
 
-namespace SandMixTool.Dialogs;
+namespace SandMix.Tool.Dialogs;
 
 public class AboutDialog : Dialog
 {
@@ -11,7 +11,7 @@ public class AboutDialog : Dialog
 		Window.Size = new Vector2( 350, 250 );
 		Window.IsDialog = true;
 		Window.MaximumSize = Size;
-		Window.Title = $"About {SandMixTool.ProjectName}";
+		Window.Title = $"About {SandMix.ProjectName}";
 		Window.SetModal( true );
 
 		CreateUI();
@@ -34,13 +34,13 @@ public class AboutDialog : Dialog
 
 		{
 			var titleVersionLabel = new Label( infoArea.Canvas );
-			titleVersionLabel.Text = $"{SandMixTool.ProjectName} <b>v{SandMixTool.ProjectVersion}</b>";
+			titleVersionLabel.Text = $"{SandMix.ProjectName} <b>v{SandMix.ProjectVersion}</b>";
 			titleVersionLabel.Alignment = TextFlag.CenterHorizontally;
 			l.Add( titleVersionLabel );
 
 			var authorsLabel = new Label( infoArea.Canvas );
 			authorsLabel.Text = "Authors:\n";
-			foreach ( var author in SandMixTool.Authors )
+			foreach ( var author in SandMix.Authors )
 			{
 				authorsLabel.Text += $"{author}\n";
 			}
@@ -54,8 +54,8 @@ public class AboutDialog : Dialog
 
 		var repoButton = new Button( this );
 		repoButton.Text = "Visit repo";
-		repoButton.Clicked += () => Utility.OpenFolder( SandMixTool.ProjectRepoURL );
-		repoButton.ToolTip = SandMixTool.ProjectRepoURL;
+		repoButton.Clicked += () => Utility.OpenFolder( SandMix.ProjectRepoURL );
+		repoButton.ToolTip = SandMix.ProjectRepoURL;
 		Layout.Add( repoButton );
 	}
 }

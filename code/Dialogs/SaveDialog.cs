@@ -1,11 +1,10 @@
-﻿using SandMixTool.Widgets;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
 using Tools;
 
-namespace SandMixTool.Dialogs;
+namespace SandMix.Tool.Dialogs;
 
 public class SaveDialog : Dialog
 {
@@ -16,9 +15,10 @@ public class SaveDialog : Dialog
 		Cancel
 	}
 
-	public event Action<Result> Triggered;
+	private bool AlreadyTriggered = false;
+	private event Action<Result> Triggered;
 
-	public SaveDialog( IEnumerable<NodeGraphWidget> mixGraphs, Widget parent = null ) : base( parent )
+	private SaveDialog( Widget parent = null ) : base( parent )
 	{
 		Window.Size = new Vector2( 400, 150 );
 		Window.IsDialog = true;
@@ -28,26 +28,19 @@ public class SaveDialog : Dialog
 
 		Triggered += OnTriggered;
 
-		CreateUI( mixGraphs );
+		CreateUI();
 		Show();
 	}
 
-	private void CreateUI( IEnumerable<NodeGraphWidget> mixGraphs )
+	private void CreateUI()
 	{
 		SetLayout( LayoutMode.TopToBottom );
 		Layout.Margin = 10;
 		Layout.Spacing = 10;
 
-		bool plural = mixGraphs.Count() > 1;
-		var files = mixGraphs.Select( mg => mg.Asset?.AbsolutePath ?? mg.UnchangedTitle );
-
 		var warningLabel1 = new Label( this );
-		warningLabel1.Text = $"The following file{(plural ? "s" : "")} have unsaved changes:";
+		warningLabel1.Text = $"There are unsaved changes!";
 		Layout.Add( warningLabel1 );
-
-		var filesLabel = new Label( this );
-		filesLabel.Text = string.Join( '\n', files );
-		Layout.Add( filesLabel );
 
 		var warningLabel2 = new Label( this );
 		warningLabel2.Text = "Do you wish to save them?";
@@ -68,7 +61,7 @@ public class SaveDialog : Dialog
 
 			var cancelButton = new Button( this );
 			cancelButton.Text = "Cancel";
-			cancelButton.Clicked += () => Triggered( Result.Cancel);
+			cancelButton.Clicked += () => Triggered( Result.Cancel );
 			hl.Add( cancelButton, 1 );
 		}
 	}
@@ -76,5 +69,13 @@ public class SaveDialog : Dialog
 	private void OnTriggered( Result result )
 	{
 		Close();
+	}
+
+	public static Task<Result> Run( Widget parent = null )
+	{
+		TaskCompletionSource<Result> tcs = new TaskCompletionSource<Result>();
+		var dialog = new SaveDialog( parent );
+		dialog.Triggered += result => tcs.SetResult( result );
+		return tcs.Task;
 	}
 }

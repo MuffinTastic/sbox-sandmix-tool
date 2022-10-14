@@ -1,117 +1,91 @@
-﻿using Sandbox;
-using Sandbox.Internal;
+﻿using System.Text;
+using Tools;
 using SandMix;
 using SandMix.Nodes;
-using SandMixTool.Dialogs;
-using SandMixTool.NodeGraph;
-using SandMixTool.Widgets;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.Json;
-using Tools;
-using Tools.NodeEditor;
+using SandMix.Tool.Widgets;
+using System.Runtime;
 
-namespace SandMixTool;
+namespace SandMix.Tool;
 
-[CanEdit( "asset:smix" )]
-[CanEdit( "asset:smixefct" )]
-public class DummyWindow : Window, IAssetEditor
+[CanEdit( $"asset:{MixGraphResource.FileExtension}" )]
+[CanEdit( $"asset:{EffectResource.FileExtension}" )]
+[Tool( SandMix.ProjectName, SandMixTool.BaseIcon, SandMix.ProjectTagline )]
+public class ToolWindow : Window, IAssetEditor
 {
-	public bool CanOpenMultipleAssets => throw new NotImplementedException();
+	public bool CanOpenMultipleAssets => false;
 
-	public DummyWindow( Widget parent = null ) : base( parent )
+	private InspectorWidget Inspector;
+	private PreviewWidget Preview;
+	private FileWidget File;
+
+	public struct MenuBarOptions
 	{
-		Close();
+		public Option FileCloseOption;
+		public Option FileSaveOption;
+		public Option FileSaveAsOption;
 
-		// created through inspector
+		public Option EditUndoOption;
+		public Option EditRedoOption;
+		public Option EditCutOption;
+		public Option EditCopyOption;
+		public Option EditPasteOption;
+		public Option EditDeleteOption;
+
+		public Option ViewPreviewOption;
+	}
+
+	private MenuBarOptions MenuOptions;
+
+	public ToolWindow()
+	{
+		// created through toolbar button
+		CreateUI();
+	}
+
+	public ToolWindow( Widget parent = null ) : base( parent )
+	{
+		Hide();
 	}
 
 	public void AssetOpen( Asset asset )
 	{
-		MainWindow.Instance ??= new MainWindow( createMix: false );
-		MainWindow.Instance.OpenNodeGraph( asset.AbsolutePath );
-		MainWindow.Instance.Focus();
-	}
-}
-
-[Tool( SandMixTool.ProjectName, "surround_sound", SandMixTool.ProjectTagline )]
-public class MainWindow : Window
-{
-	public static MainWindow Instance { get; set; }
-
-
-	private InspectorWidget Inspector;
-	private PreviewWidget Preview;
-
-	private NodeGraphWidget CurrentNodeGraph;
-	private List<NodeGraphWidget> NodeGraphs = new();
-
-	private DockWidget NewFileHandle;
-
-	private Option GraphSaveOption;
-	private Option GraphSaveAsOption;
-
-	private Option GraphUndoOption;
-	private Option GraphRedoOption;
-	private Option GraphCutOption;
-	private Option GraphCopyOption;
-	private Option GraphPasteOption;
-	private Option GraphDeleteOption;
-
-	public MainWindow() : this( createMix: true )
-	{
-
-	}
-
-	public MainWindow( bool createMix )
-	{
-		if ( Instance is not null )
-		{
-			Hide();
-			Close();
-
-			Instance.Focus();
-			return;
-		}
-
-		Instance = this;
-
-		Title = SandMixTool.ProjectName;
-		Size = new Vector2( 1920, 1080 );
-
-		CreateUI( createMix );
-		Show();
-
-		// created through toolbar button
+		CreateUI();
+		_ = File.FileOpen( asset );
 	}
 
 	public void BuildMenu()
 	{
 		MenuBar.Clear();
 
+		MenuOptions = new MenuBarOptions();
+
 		var file = MenuBar.AddMenu( "File" );
 		{
 			var newMix = file.AddOption( "New Mix" );
-			newMix.Triggered += () => CreateNodeGraph( MixGraphResource.FileExtension );
+			newMix.Triggered += () => _ = File.FileNew( GraphType.Mix );
 			newMix.Shortcut = "Ctrl+N";
 
 			var newEffect = file.AddOption( "New Effect" );
-			newEffect.Triggered += () => CreateNodeGraph( EffectResource.FileExtension );
+			newEffect.Triggered += () => _ = File.FileNew( GraphType.Effect );
 			newEffect.Shortcut = "Ctrl+Shift+N";
 
 			var open = file.AddOption( "Open" );
-			open.Triggered += () => OpenMixGraphFromChooser();
+			open.Triggered += () => _ = File.FileOpen();
 			open.Shortcut = "Ctrl+O";
 
 			file.AddSeparator();
 
-			GraphSaveOption = new Option( title: "Save", icon: null, action: () => CurrentNodeGraph?.Save() );
-			GraphSaveOption.Shortcut = "Ctrl+S";
-			file.AddOption( GraphSaveOption );
+			MenuOptions.FileCloseOption = file.AddOption( "Close" );
+			MenuOptions.FileCloseOption.Triggered += () => _ = File.FileClose();
 
-			GraphSaveAsOption = new Option( title: "Save As", icon: null, action: () => CurrentNodeGraph?.SaveAs() );
-			file.AddOption( GraphSaveAsOption );
+			file.AddSeparator();
+
+			MenuOptions.FileSaveOption = new Option( title: "Save", icon: null, action: () => File.Save() );
+			MenuOptions.FileSaveOption.Shortcut = "Ctrl+S";
+			file.AddOption( MenuOptions.FileSaveOption );
+
+			MenuOptions.FileSaveAsOption = new Option( title: "Save As", icon: null, action: () => File.SaveAs() );
+			file.AddOption( MenuOptions.FileSaveAsOption );
 
 			file.AddSeparator();
 
@@ -120,36 +94,40 @@ public class MainWindow : Window
 
 		var edit = MenuBar.AddMenu( "Edit" );
 		{
-			GraphUndoOption = new Option( title: "Undo", icon: null, action: () => CurrentNodeGraph?.GraphUndo() );
-			GraphUndoOption.Shortcut = "Ctrl+Z";
-			edit.AddOption( GraphUndoOption );
+			MenuOptions.EditUndoOption = new Option( title: "Undo", icon: null, action: () => File.EditUndo() );
+			MenuOptions.EditUndoOption.Shortcut = "Ctrl+Z";
+			edit.AddOption( MenuOptions.EditUndoOption );
 
-			GraphRedoOption = new Option( title: "Redo", icon: null, action: () => CurrentNodeGraph?.GraphRedo() );
-			GraphRedoOption.Shortcut = "Ctrl+Y";
-			edit.AddOption( GraphRedoOption );
+			MenuOptions.EditRedoOption = new Option( title: "Redo", icon: null, action: () => File.EditRedo() );
+			MenuOptions.EditRedoOption.Shortcut = "Ctrl+Y";
+			edit.AddOption( MenuOptions.EditRedoOption );
 
 			edit.AddSeparator();
 
-			GraphCutOption = new Option( title: "Cut", icon: null, action: () => CurrentNodeGraph?.GraphCut() );
-			GraphCutOption.Shortcut = "Ctrl+X";
-			edit.AddOption( GraphCutOption );
+			MenuOptions.EditCutOption = new Option( title: "Cut", icon: null, action: () => File.EditCut() );
+			MenuOptions.EditCutOption.Shortcut = "Ctrl+X";
+			edit.AddOption( MenuOptions.EditCutOption );
 
-			GraphCopyOption = new Option( title: "Copy", icon: null, action: () => CurrentNodeGraph?.GraphCopy() );
-			GraphCopyOption.Shortcut = "Ctrl+C";
-			edit.AddOption( GraphCopyOption );
+			MenuOptions.EditCopyOption = new Option( title: "Copy", icon: null, action: () => File.EditCopy() );
+			MenuOptions.EditCopyOption.Shortcut = "Ctrl+C";
+			edit.AddOption( MenuOptions.EditCopyOption );
 
-			GraphPasteOption = new Option( title: "Paste", icon: null, action: () => CurrentNodeGraph?.GraphPaste() );
-			GraphPasteOption.Shortcut = "Ctrl+V";
-			edit.AddOption( GraphPasteOption );
+			MenuOptions.EditPasteOption = new Option( title: "Paste", icon: null, action: () => File.EditPaste() );
+			MenuOptions.EditPasteOption.Shortcut = "Ctrl+V";
+			edit.AddOption( MenuOptions.EditPasteOption );
 
-			GraphDeleteOption = new Option( title: "Delete", icon: null, action: () => CurrentNodeGraph?.GraphDelete() );
-			GraphDeleteOption.Shortcut = "Del";
-			edit.AddOption( GraphDeleteOption );
+			MenuOptions.EditDeleteOption = new Option( title: "Delete", icon: null, action: () => File.EditDelete() );
+			MenuOptions.EditDeleteOption.Shortcut = "Del";
+			edit.AddOption( MenuOptions.EditDeleteOption );
 		}
 
 		var view = MenuBar.AddMenu( "View" );
 		{
-			view.AddOption( Preview.GetToggleViewOption() );
+			view.AddOption( File.GetToggleViewOption() );
+
+			MenuOptions.ViewPreviewOption = Preview.GetToggleViewOption();
+			view.AddOption( MenuOptions.ViewPreviewOption );
+
 			view.AddOption( Inspector.GetToggleViewOption() );
 		}
 
@@ -161,51 +139,86 @@ public class MainWindow : Window
 		}
 	}
 
-	public void UpdateMenuBar()
+	public void CreateUI()
 	{
-		if ( !IsValid ) return;
-
-		var nodeGraphFocused = CurrentNodeGraph is not null;
-		GraphSaveOption.Enabled = nodeGraphFocused;
-		GraphSaveAsOption.Enabled = nodeGraphFocused;
-
-		GraphUndoOption.Enabled = CurrentNodeGraph?.GraphCanUndo() ?? false;
-		GraphRedoOption.Enabled = CurrentNodeGraph?.GraphCanRedo() ?? false;
-
-		var hasSelection = CurrentNodeGraph?.GraphHasSelection() ?? false;
-		GraphCutOption.Enabled = hasSelection;
-		GraphCopyOption.Enabled = hasSelection;
-		GraphPasteOption.Enabled = nodeGraphFocused;
-		GraphDeleteOption.Enabled = hasSelection;
-	}
-
-	public void CreateUI( bool createMix )
-	{
-		//Clear();
-		CurrentNodeGraph = null;
-
-		NewFileHandle = new DockWidget( "", null, this );
-		Dock( NewFileHandle, DockArea.Left );
-		NewFileHandle.Hide();
+		Title = SandMix.ProjectName;
+		Size = new Vector2( 1920, 1080 );
+		SetWindowIcon( SandMixTool.BaseIcon );
 
 		Preview = new PreviewWidget( null, this );
 		Preview.MinimumSize = (Vector2) 300.0f;
-		Dock( Preview, DockArea.Right );
-		Preview.Show();
 
 		Inspector = new InspectorWidget( this );
 		Inspector.MinimumSize = (Vector2) 300.0f;
-		Dock( Inspector, DockArea.Right );
-		Inspector.Show();
+
+		File = new FileWidget( this, Preview, Inspector );
+		File.MinimumSize = (Vector2)300.0f;
+
+		Dock( File, DockArea.Left );
+		Dock( Inspector, DockArea.Left );
+		Dock( Preview, DockArea.Right );
+
+		Inspector.Height = Inspector.MinimumHeight;
 
 		BuildMenu();
+		File.SetMenuBarOptions( MenuOptions );
 
-		if ( createMix )
-		{
-			CreateNodeGraph( MixGraphResource.FileExtension );
-		}
+		File.Show();
+		Inspector.Show();
+		Preview.Show();
+
+		Show();
 	}
 
+	public override void SetWindowIcon( string name )
+	{
+		var icon = new Pixmap( 128, 128 );
+		icon.Clear( Color.Transparent );
+
+		Paint.Target( icon );
+
+		var r = new Rect( 0, 0, 128, 128 );
+
+		Paint.ClearPen();
+
+		Paint.SetBrush( Theme.Black );
+		Paint.DrawRect( r, 16 );
+
+		Paint.SetPen( Theme.White );
+		Paint.DrawIcon( r, name, 128 );
+
+		Paint.Target( null );
+
+		base.SetWindowIcon( icon );
+	}
+
+	public void ResetWindowIcon()
+	{
+		SetWindowIcon( SandMixTool.BaseIcon );
+	}
+
+	public void SetWindowTitle( string title )
+	{
+		var sb = new StringBuilder();
+		sb.Append( SandMix.ProjectName );
+
+		if ( !string.IsNullOrEmpty( title ) )
+		{
+			sb.Append( " - " );
+			sb.Append( title );
+		}
+
+		Title = sb.ToString();
+	}
+
+	public void ResetWindowTitle()
+	{
+		SetWindowTitle( null );
+	}
+
+
+
+	/*
 	public NodeGraphWidget CreateNodeGraph( string extension )
 	{
 
@@ -283,11 +296,6 @@ public class MainWindow : Window
 
 	protected override void OnClosed()
 	{
-		if ( Instance == this )
-		{
-			Instance = null;
-		}
-
 		var unsavedMixGraphs = NodeGraphs.Where( mg => mg.Changed && mg.AttemptSave );
 
 		if ( unsavedMixGraphs.Count() == 0 )
@@ -340,4 +348,5 @@ public class MainWindow : Window
 
 		UpdateMenuBar();
 	}
+	*/
 }

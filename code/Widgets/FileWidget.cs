@@ -312,6 +312,6 @@ public class FileWidget : DockWidget
 
 	public void EditDelete()
 	{
-		throw new NotImplementedException();
+		GraphView?.GraphDelete();
 	}
 }

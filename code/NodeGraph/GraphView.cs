@@ -54,6 +54,7 @@ public class GraphView : GraphicsView
 
 		Graph = graph;
 
+		SetViewport( center: Graph.EditorCenter, scale: Graph.EditorScale );
 		SetupNodeTypes();
 
 		Show();
@@ -63,17 +64,28 @@ public class GraphView : GraphicsView
 	{
 		base.OnDestroyed();
 
-
 		NodeSelect = null;
 		GraphUpdated = null;
 	}
 
-	private float gridZoom = 1.0f;
+	public void SetViewport( Vector2 center, float scale )
+	{
+		Graph.EditorCenter = center;
+		Graph.EditorScale = scale;
+
+		Scale = (Vector2) Graph.EditorScale;
+		CenterOn( Graph.EditorCenter );
+	}
+
+	public void ResetViewport()
+	{
+		SetViewport( center: Vector2.Zero, scale: 1.0f );
+	}
 
 	protected override void OnWheel( WheelEvent e )
 	{
 		float delta = e.Delta > 0 ? 1.1f : 0.90f;
-		gridZoom *= delta;
+		Graph.EditorScale *= delta;
 		Zoom( delta, e.Position );
 		e.Accept();
 	}
@@ -213,7 +225,7 @@ public class GraphView : GraphicsView
 	{
 		var area = GetVisibleArea();
 
-		float lineWidth = GridLineWidth * gridZoom;
+		float lineWidth = GridLineWidth * Graph.EditorScale;
 
 		void DrawGrid( Vector2 offset )
 		{
@@ -256,6 +268,7 @@ public class GraphView : GraphicsView
 		{
 			var delta = ToScene( e.LocalPosition ) - lastMousePosition;
 			Translate( delta );
+			Graph.EditorCenter = GetVisibleArea().Center;
 			e.Accepted = true;
 			Cursor = CursorShape.ClosedHand;
 		}

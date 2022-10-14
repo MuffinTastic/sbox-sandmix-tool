@@ -68,9 +68,13 @@ public class GraphView : GraphicsView
 		GraphUpdated = null;
 	}
 
+	private float gridZoom = 1.0f;
+
 	protected override void OnWheel( WheelEvent e )
 	{
-		Zoom( e.Delta > 0 ? 1.1f : 0.90f, e.Position );
+		float delta = e.Delta > 0 ? 1.1f : 0.90f;
+		gridZoom *= delta;
+		Zoom( delta, e.Position );
 		e.Accept();
 	}
 
@@ -200,6 +204,47 @@ public class GraphView : GraphicsView
 		}
 
 		menu.OpenAt( e.ScreenPosition );
+	}
+
+	private const float GridSize = 250.0f;
+	private const float GridLineWidth = 3.0f;
+
+	protected override void OnPaint()
+	{
+		var area = GetVisibleArea();
+
+		float lineWidth = GridLineWidth * gridZoom;
+
+		void DrawGrid( Vector2 offset )
+		{
+			for ( float x = ((area.Left - offset.x) / GridSize).Floor() * GridSize + offset.x; x < area.Right; x += GridSize )
+			{
+				Paint.DrawLine( new Vector2[]
+				{
+				FromScene( new Vector2( x, area.Top ) ),
+				FromScene( new Vector2( x, area.Bottom ) ),
+				} );
+			}
+
+			for ( float y = ((area.Top - offset.y) / GridSize).Floor() * GridSize + offset.y; y < area.Bottom; y += GridSize )
+			{
+				Paint.DrawLine( new Vector2[]
+				{
+				FromScene( new Vector2( area.Left, y ) ),
+				FromScene( new Vector2( area.Right, y ) ),
+				} );
+			}
+		}
+
+		Paint.SetPen( Theme.Grey * 0.45f, lineWidth );
+
+		DrawGrid( (Vector2) GridSize / 2.0f );
+
+		Paint.SetPen( Theme.Grey * 0.6f, lineWidth );
+
+		DrawGrid( Vector2.Zero );
+
+		base.OnPaint();
 	}
 
 	Vector2 dragStart;

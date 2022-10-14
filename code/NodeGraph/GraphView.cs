@@ -54,31 +54,9 @@ public class GraphView : GraphicsView
 
 		Graph = graph;
 
-		SetupNodeList();
+		SetupNodeTypes();
 
 		Show();
-	}
-
-	[Event.Hotload]
-	private void SetupNodeList()
-	{
-		ClearNodeTypes();
-
-		var baseNodeType = Graph.GraphType switch
-		{
-			GraphType.Mix => typeof( BaseMixNode ),
-			GraphType.Effect => typeof( BaseEffectNode ),
-			_ => throw new Exception( "Unknown graph type" )
-		};
-
-		var descriptions =
-			TypeLibrary.GetDescriptions( baseNodeType )
-			.Where( td => !td.IsAbstract );
-
-		foreach ( var nodeType in descriptions )
-		{
-			AddNodeType( nodeType.TargetType );
-		}
 	}
 
 	public override void OnDestroyed()
@@ -111,6 +89,28 @@ public class GraphView : GraphicsView
 	internal void ClearNodeTypes()
 	{
 		AvailableNodes.Clear();
+	}
+
+	[Event.Hotload]
+	private void SetupNodeTypes()
+	{
+		ClearNodeTypes();
+
+		var baseNodeType = Graph.GraphType switch
+		{
+			GraphType.Mix => typeof( BaseMixNode ),
+			GraphType.Effect => typeof( BaseEffectNode ),
+			_ => throw new Exception( "Unknown graph type" )
+		};
+
+		var descriptions =
+			TypeLibrary.GetDescriptions( baseNodeType )
+			.Where( td => !td.IsAbstract );
+
+		foreach ( var nodeType in descriptions )
+		{
+			AddNodeType( nodeType.TargetType );
+		}
 	}
 
 	private class ContextGroup

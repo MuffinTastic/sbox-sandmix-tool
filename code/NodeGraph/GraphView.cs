@@ -107,6 +107,11 @@ public class GraphView : GraphicsView
 		{
 			var display = DisplayInfo.ForType( node );
 
+			if ( !SandMixTool.Debug && display.Group == "Debug" )
+			{
+				continue;
+			}
+
 			var groupName = display.Group ?? "Other";
 
 			var group = groups.Where( g => g.Name == groupName ).FirstOrDefault();

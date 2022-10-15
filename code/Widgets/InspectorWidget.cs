@@ -14,6 +14,10 @@ public class InspectorWidget : DockWidget
 	InspectorHeader Header;
 	NodeUI CurrentNodeUI;
 
+	ScrollArea PropertyScroller;
+	Separator Separator;
+	Widget NodeEditor;
+
 	public string CurrentTime => System.DateTime.Now.ToString();
 
 
@@ -28,7 +32,7 @@ public class InspectorWidget : DockWidget
 		Widget.Layout.Add( Header );
 
 		Editor = new Widget( Widget );
-		Editor.SetLayout( LayoutMode.TopToBottom );
+		Editor.SetLayout( LayoutMode.LeftToRight );
 
 		Widget.Layout.Add( Editor, -1 );
 
@@ -37,7 +41,8 @@ public class InspectorWidget : DockWidget
 
 	public override void ChildValuesChanged( Widget source )
 	{
-		CurrentNodeUI.Graph.CallGraphUpdated();
+		CurrentNodeUI?.Graph?.CallGraphUpdated();
+		CurrentNodeUI?.Update();
 	}
 
 	public void StartInspecting( NodeUI nodeUI )
@@ -50,25 +55,35 @@ public class InspectorWidget : DockWidget
 		using var sx = SuspendUpdates.For( this );
 
 		Editor.DestroyChildren();
+		Editor.Layout.Clear( true );
 
 		CurrentNodeUI = nodeUI;
 		var node = nodeUI?.Node;
 
-		var customeditor = SandMixInspectorAttribute.CreateEditorForObject( node );
-		if ( customeditor != null )
-		{
-			Editor.Layout.Add( customeditor, 1 );
-		}
-		else
 		{
 			var PropertySheet = new Inspector.PropertySheet( this );
 			PropertySheet.Target = node;
+			PropertySheet.OnChildValuesChanged += ChildValuesChanged;
 
-			var scroller = new ScrollArea( this );
-			scroller.Canvas = PropertySheet;
+			PropertyScroller = new ScrollArea( this );
+			PropertyScroller.Canvas = PropertySheet;
 
-			Editor.Layout.Add( scroller );
+			PropertyScroller.MinimumWidth = 400.0f;
+			PropertyScroller.MaximumWidth = 400.0f;
+
+			Editor.Layout.Add( PropertyScroller, 0 );
 		}
+
+		NodeEditor = SandMixInspectorAttribute.CreateEditorForObject( node );
+		if ( NodeEditor is null )
+		{
+			NodeEditor = new Widget( null );
+		}
+
+		Separator = Editor.Layout.AddSeparator();
+		Editor.Layout.Add( NodeEditor, 1 );
+
+		// Editor.Layout.SetRowStretch( 0 );
 
 		if ( addToHistory )
 		{
@@ -96,6 +111,28 @@ public class InspectorWidget : DockWidget
 
 		// keep buttons updates
 		UpdateBackForward();
+	}
+
+	protected override void DoLayout()
+	{
+		if ( CurrentNodeUI is null )
+		{
+			return;
+		}
+
+		if ( NodeEditor != null )
+		{
+			if ( Size.x < PropertyScroller.Size.x * 2 )
+			{
+				Separator.Hide();
+				NodeEditor.Hide();
+			}
+			else
+			{
+				Separator.Show();
+				NodeEditor.Show();
+			}
+		}
 	}
 
 	private void JumpToHistory()

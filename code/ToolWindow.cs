@@ -53,6 +53,12 @@ public class ToolWindow : Window, IAssetEditor
 		_ = File.FileOpen( asset );
 	}
 
+	public static void OpenNew( Asset asset )
+	{
+		var window = new ToolWindow();
+		_ = window.File.FileOpen( asset );
+	}
+
 	public void BuildMenu()
 	{
 		MenuBar.Clear();

@@ -4,6 +4,7 @@ using System.Linq;
 using Sandbox;
 
 using SandMix.Tool.NodeGraph;
+using SandMix.Tool.Inspector;
 
 namespace SandMix.Tool.Widgets;
 
@@ -53,14 +54,14 @@ public class InspectorWidget : DockWidget
 		CurrentNodeUI = nodeUI;
 		var node = nodeUI?.Node;
 
-		var customeditor = CanEditAttribute.CreateEditorForObject( node );
+		var customeditor = SandMixInspectorAttribute.CreateEditorForObject( node );
 		if ( customeditor != null )
 		{
 			Editor.Layout.Add( customeditor, 1 );
 		}
 		else
 		{
-			var PropertySheet = new Tools.PropertySheet( this );
+			var PropertySheet = new Inspector.PropertySheet( this );
 			PropertySheet.Target = node;
 
 			var scroller = new ScrollArea( this );

@@ -58,7 +58,6 @@ public class FileWidget : DockWidget
 
 		if ( !FileIsOpen )
 		{
-			SetIcon( SandMixTool.BaseIcon );
 			window.ResetWindowIcon();
 			window.ResetWindowTitle();
 			return;
@@ -92,7 +91,6 @@ public class FileWidget : DockWidget
 			title += "*";
 		}
 
-		SetIcon( icon );
 		window.SetWindowIcon( icon );
 		window.SetWindowTitle( title );
 	}

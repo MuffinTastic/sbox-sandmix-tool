@@ -27,9 +27,16 @@ public class SoundAssetExtra : Widget
 		MouseTracking = true;
 		AcceptDrops = true;
 
+		PlayButton ??= new Button( "", "volume_up", this );
+		PlayButton.ButtonType = "primary";
+		PlayButton.ToolTip = "Play track";
+		PlayButton.Clicked = () => Utility.PlayAssetSound( Asset );
+		PlayButton.MaximumSize = Theme.RowHeight;
+		Layout.Add( PlayButton );
+
 		FocusButton ??= new Button( "", "filter_center_focus", this );
 		FocusButton.ButtonType = "primary";
-		FocusButton.ToolTip = "Focus on track in editor";
+		FocusButton.ToolTip = "Focus on effect in s&box editor";
 		FocusButton.Clicked = () => {
 			MainAssetBrowser.Instance?.FocusOnAsset( Asset );
 			Utility.InspectorObject = Asset;
@@ -38,15 +45,10 @@ public class SoundAssetExtra : Widget
 		FocusButton.MaximumSize = Theme.RowHeight;
 		Layout.Add( FocusButton );
 
-		PlayButton ??= new Button( "", "volume_up", this );
-		PlayButton.ButtonType = "primary";
-		PlayButton.ToolTip = "Play track";
-		PlayButton.Clicked = () => Utility.PlayAssetSound( Asset );
-		PlayButton.MaximumSize = Theme.RowHeight;
-		Layout.Add( PlayButton );
-
 		Layout.Margin = 4;
 		Layout.Spacing = 4;
+
+		OnAssetChanged();
 	}
 
 	void OnAssetChanged()

@@ -47,6 +47,8 @@ public class EffectExtra : Widget
 
 		Layout.Margin = 4;
 		Layout.Spacing = 4;
+
+		OnAssetChanged();
 	}
 
 	void OnAssetChanged()

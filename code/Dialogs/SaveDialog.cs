@@ -26,6 +26,8 @@ public class SaveDialog : Dialog
 		Window.Title = "Save changes?";
 		Window.SetModal( true );
 
+		Window.SetWindowIcon( Util.RenderIcon( "save" ) );
+
 		Triggered += OnTriggered;
 
 		CreateUI();

@@ -14,6 +14,8 @@ public class AboutDialog : Dialog
 		Window.Title = $"About {SandMix.ProjectName}";
 		Window.SetModal( true );
 
+		Window.SetWindowIcon( Util.RenderIcon( "info" ) );
+
 		CreateUI();
 	}
 

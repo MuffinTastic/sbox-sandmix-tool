@@ -29,12 +29,14 @@ public class EffectExtra : Widget
 
 		OpenInNewButton ??= new Button( "", "open_in_new", this );
 		OpenInNewButton.ButtonType = "primary";
+		OpenInNewButton.ToolTip = "Open effect in new window";
 		OpenInNewButton.Clicked = () => ToolWindow.OpenNew( Asset );
 		OpenInNewButton.MaximumSize = Theme.RowHeight;
 		Layout.Add( OpenInNewButton );
 
 		FocusButton ??= new Button( "", "filter_center_focus", this );
 		FocusButton.ButtonType = "primary";
+		FocusButton.ToolTip = "Focus on effect in s&box editor";
 		FocusButton.Clicked = () => {
 			MainAssetBrowser.Instance?.FocusOnAsset( Asset );
 			Utility.InspectorObject = Asset;

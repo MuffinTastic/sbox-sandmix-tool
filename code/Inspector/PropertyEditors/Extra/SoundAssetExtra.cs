@@ -29,6 +29,7 @@ public class SoundAssetExtra : Widget
 
 		FocusButton ??= new Button( "", "filter_center_focus", this );
 		FocusButton.ButtonType = "primary";
+		FocusButton.ToolTip = "Focus on track in editor";
 		FocusButton.Clicked = () => {
 			MainAssetBrowser.Instance?.FocusOnAsset( Asset );
 			Utility.InspectorObject = Asset;
@@ -39,6 +40,7 @@ public class SoundAssetExtra : Widget
 
 		PlayButton ??= new Button( "", "volume_up", this );
 		PlayButton.ButtonType = "primary";
+		PlayButton.ToolTip = "Play track";
 		PlayButton.Clicked = () => Utility.PlayAssetSound( Asset );
 		PlayButton.MaximumSize = Theme.RowHeight;
 		Layout.Add( PlayButton );

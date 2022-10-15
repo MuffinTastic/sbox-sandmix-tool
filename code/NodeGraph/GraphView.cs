@@ -77,7 +77,7 @@ public class GraphView : GraphicsView
 		CenterOn( Graph.EditorCenter );
 	}
 
-	public void ResetViewport()
+	public void Recenter()
 	{
 		SetViewport( center: Vector2.Zero, scale: 1.0f );
 	}

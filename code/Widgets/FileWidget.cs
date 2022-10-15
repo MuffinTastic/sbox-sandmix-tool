@@ -114,6 +114,8 @@ public class FileWidget : DockWidget
 		MenuOptions.EditCopyOption.Enabled = hasSelection;
 		MenuOptions.EditPasteOption.Enabled = fileOpen;
 		MenuOptions.EditDeleteOption.Enabled = hasSelection;
+
+		MenuOptions.ViewRecenterGraphViewOption.Enabled = fileOpen;
 	}
 
 	private void SetupGraph( GraphContainer graph )
@@ -315,8 +317,8 @@ public class FileWidget : DockWidget
 		GraphView?.GraphDelete();
 	}
 
-	public void RecenterView()
+	public void RecenterGraphView()
 	{
-		GraphView?.ResetViewport();
+		GraphView?.Recenter();
 	}
 }

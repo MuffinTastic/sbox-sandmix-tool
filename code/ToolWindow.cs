@@ -31,19 +31,19 @@ public class ToolWindow : Window, IAssetEditor
 		public Option EditDeleteOption;
 
 		public Option ViewPreviewOption;
-		public Option RecenterViewOption;
+		public Option ViewRecenterGraphViewOption;
 	}
 
 	private MenuBarOptions MenuOptions;
 
 	public ToolWindow()
 	{
-		// created through toolbar button
 		CreateUI();
 	}
 
 	public ToolWindow( Widget parent = null ) : base( parent )
 	{
+		// So it doesn't show in the main editor inspector
 		Hide();
 	}
 
@@ -132,8 +132,8 @@ public class ToolWindow : Window, IAssetEditor
 
 			view.AddSeparator();
 
-			MenuOptions.RecenterViewOption = new Option( title: "Recenter Graph View", icon: null, action: () => File.RecenterView() );
-			view.AddOption( MenuOptions.RecenterViewOption );
+			MenuOptions.ViewRecenterGraphViewOption = new Option( title: "Recenter Graph View", icon: null, action: () => File.RecenterGraphView() );
+			view.AddOption( MenuOptions.ViewRecenterGraphViewOption );
 		}
 
 		var help = MenuBar.AddMenu( "Help" );

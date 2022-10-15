@@ -20,7 +20,7 @@ public class SaveDialog : Dialog
 
 	private SaveDialog( Widget parent = null ) : base( parent )
 	{
-		Window.Size = new Vector2( 400, 150 );
+		Window.Size = new Vector2( 400, 120 );
 		Window.IsDialog = true;
 		Window.MaximumSize = Size;
 		Window.Title = "Save changes?";
@@ -40,13 +40,12 @@ public class SaveDialog : Dialog
 		Layout.Margin = 10;
 		Layout.Spacing = 10;
 
-		var warningLabel1 = new Label( this );
-		warningLabel1.Text = $"There are unsaved changes!";
-		Layout.Add( warningLabel1 );
-
-		var warningLabel2 = new Label( this );
-		warningLabel2.Text = "Do you wish to save them?";
-		Layout.Add( warningLabel2 );
+		var warningLabel = new Label( this );
+		warningLabel.Text =
+			"There are unsaved changes!\n" +
+			"\n" +
+			"Do you wish to save them?";
+		Layout.Add( warningLabel );
 
 		var hl = Layout.Add( LayoutMode.LeftToRight );
 		hl.Spacing = 4;

@@ -230,6 +230,12 @@ public class FileWidget : DockWidget
 
 	public async Task<bool> FileClose()
 	{
+		// FIXME: CloseEvent not being there causes weird shit, patch it here for now
+		if ( Asset is not null && OpenFiles.ContainsKey( Asset.AbsolutePath ) )
+		{
+			OpenFiles.Remove( Asset.AbsolutePath );
+		}
+
 		if ( FileIsOpen && UnsavedChanges )
 		{
 			var result = await SaveDialog.RunAsync( Parent );
@@ -245,13 +251,10 @@ public class FileWidget : DockWidget
 					break;
 
 				case SaveDialog.Result.Cancel:
+					// FIXME: CloseEvent
+					OpenFiles.Add( Asset.AbsolutePath, this );
 					return false;
 			}
-		}
-
-		if ( Asset is not null && OpenFiles.ContainsKey( Asset.AbsolutePath ) )
-		{
-			OpenFiles.Remove( Asset.AbsolutePath );
 		}
 
 		Reset();

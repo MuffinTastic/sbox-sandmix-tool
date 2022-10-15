@@ -308,8 +308,6 @@ public class SandMixInspectorAttribute : Attribute, ITypeAttribute
 
 	private int CanEdit( Type t, IEnumerable<Attribute> attributes, string name )
 	{
-		Log.Info( $"{t}, {attributes}, {name}" );
-
 		int num = -500;
 		if ( EditorAttributeTypes.Count > 0 )
 		{

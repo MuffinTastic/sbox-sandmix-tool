@@ -60,6 +60,7 @@ public class InspectorWidget : DockWidget
 		CurrentNodeUI = nodeUI;
 		var node = nodeUI?.Node;
 
+		if (node is not null)
 		{
 			var PropertySheet = new Inspector.PropertySheet( this );
 			PropertySheet.Target = node;
@@ -72,18 +73,18 @@ public class InspectorWidget : DockWidget
 			PropertyScroller.MaximumWidth = 400.0f;
 
 			Editor.Layout.Add( PropertyScroller, 0 );
+
+			NodeEditor = SandMixInspectorAttribute.CreateEditorForObject( node );
+			if ( NodeEditor is null )
+			{
+				NodeEditor = new Widget( null );
+			}
+
+			Separator = Editor.Layout.AddSeparator();
+			Editor.Layout.Add( NodeEditor, 1 );
 		}
 
-		NodeEditor = SandMixInspectorAttribute.CreateEditorForObject( node );
-		if ( NodeEditor is null )
-		{
-			NodeEditor = new Widget( null );
-		}
-
-		Separator = Editor.Layout.AddSeparator();
-		Editor.Layout.Add( NodeEditor, 1 );
-
-		// Editor.Layout.SetRowStretch( 0 );
+		MinimumSize = Editor.MinimumSize = new Vector2(400.0f, 300.0f);
 
 		if ( addToHistory )
 		{
@@ -122,13 +123,14 @@ public class InspectorWidget : DockWidget
 
 		if ( NodeEditor != null )
 		{
-			if ( Size.x < PropertyScroller.Size.x * 2 )
+			if ( Size.x < PropertyScroller.Size.x * 2.0f )
 			{
 				Separator.Hide();
 				NodeEditor.Hide();
 			}
 			else
 			{
+
 				Separator.Show();
 				NodeEditor.Show();
 			}

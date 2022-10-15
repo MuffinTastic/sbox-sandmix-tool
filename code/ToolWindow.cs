@@ -237,7 +237,7 @@ public class ToolWindow : Window, IAssetEditor
 		SetWindowTitle( null );
 	}
 
-	// FIXME: This won't ever work properly until the CloseEvent parameter is added back
+	// FIXME: CloseEvent, this won't ever work properly until that parameter is added back
 	protected override void OnClosed()
 	{
 		if ( File is null )

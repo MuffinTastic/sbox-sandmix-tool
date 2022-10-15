@@ -10,11 +10,14 @@ using SandMix.Nodes.Effects;
 using SandMix.Tool.Dialogs;
 using System.Threading.Tasks;
 using System.Threading.Channels;
+using System.Collections.Generic;
 
 namespace SandMix.Tool.Widgets;
 
 public class FileWidget : DockWidget
 {
+	private static Dictionary<string, FileWidget> OpenFiles = new();
+
 	private ToolWindow.MenuBarOptions MenuOptions;
 	private PreviewWidget Preview;
 	private InspectorWidget Inspector;
@@ -199,6 +202,13 @@ public class FileWidget : DockWidget
 			}
 		}
 
+		if ( OpenFiles.TryGetValue( asset.AbsolutePath, out FileWidget openFile ) )
+		{
+			openFile.Focus();
+			(Parent as ToolWindow).Close();
+			return;
+		}
+
 		Asset = asset;
 
 		(var resource, var graphType) = SandMixResource.GetFromAsset( Asset );
@@ -214,6 +224,8 @@ public class FileWidget : DockWidget
 		}
 
 		SetupGraph( Graph );
+
+		OpenFiles.Add( Asset.AbsolutePath, this );
 	}
 
 	public async Task<bool> FileClose()
@@ -235,6 +247,11 @@ public class FileWidget : DockWidget
 				case SaveDialog.Result.Cancel:
 					return false;
 			}
+		}
+
+		if ( Asset is not null && OpenFiles.ContainsKey( Asset.AbsolutePath ) )
+		{
+			OpenFiles.Remove( Asset.AbsolutePath );
 		}
 
 		Reset();
@@ -283,6 +300,7 @@ public class FileWidget : DockWidget
 		if ( fd.Execute() )
 		{
 			Asset = AssetSystem.CreateResource( extension, fd.SelectedFile );
+			OpenFiles.Add( Asset.AbsolutePath, this );
 			WriteAsset();
 		}
 	}

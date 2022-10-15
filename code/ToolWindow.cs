@@ -38,6 +38,8 @@ public class ToolWindow : Window, IAssetEditor
 
 	public ToolWindow()
 	{
+		Hide();
+
 		CreateUI();
 	}
 
@@ -178,7 +180,15 @@ public class ToolWindow : Window, IAssetEditor
 		Inspector.Show();
 		Preview.Show();
 
-		Show();
+		var showWindow = async () =>
+		{
+			await Task.Delay( 100 );
+
+			if ( IsValid )
+				Show();
+		};
+
+		showWindow();
 	}
 
 	public override void SetWindowIcon( string name )

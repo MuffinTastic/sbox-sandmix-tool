@@ -88,6 +88,8 @@ public class GraphView : GraphicsView
 		Graph.EditorScale *= delta;
 		Zoom( delta, e.Position );
 		e.Accept();
+
+		CallGraphUpdated();
 	}
 
 	internal void AddNodeType<T>()
@@ -271,6 +273,8 @@ public class GraphView : GraphicsView
 			Graph.EditorCenter = GetVisibleArea().Center;
 			e.Accepted = true;
 			Cursor = CursorShape.ClosedHand;
+
+			CallGraphUpdated();
 		}
 		else
 		{

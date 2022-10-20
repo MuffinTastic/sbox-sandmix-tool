@@ -33,8 +33,9 @@ public class FileWidget : DockWidget
 	private bool UnsavedChanges = false;
 
 	public FileWidget( Widget parent, PreviewWidget preview, InspectorWidget inspector )
-		: base( "Graph View", SandMixTool.BaseIcon, parent )
+		: base( null, SandMixTool.BaseIcon, parent )
 	{
+		Title = Util.GetLocalized( "#smix.ui.graphview" );
 		Preview = preview;
 		Inspector = inspector;
 
@@ -80,8 +81,8 @@ public class FileWidget : DockWidget
 		{
 			title = Graph.GraphType switch
 			{
-				GraphType.Mix => "New Mixgraph",
-				GraphType.Effect => "New Effect",
+				GraphType.Mix => Util.GetLocalized( "#smix.ui.newmixgraph" ),
+				GraphType.Effect => Util.GetLocalized( "#smix.ui.neweffectgraph" ),
 				_ => throw new Exception( "Unknown graph type" )
 			};
 		}
@@ -250,7 +251,10 @@ public class FileWidget : DockWidget
 
 				case SaveDialog.Result.Cancel:
 					// FIXME: CloseEvent
-					OpenFiles.Add( Asset.AbsolutePath, this );
+					if ( Asset is not null )
+					{
+						OpenFiles.Add( Asset.AbsolutePath, this );
+					}
 					return false;
 			}
 		}

@@ -154,12 +154,12 @@ public class GraphView : GraphicsView
 		{
 			var display = DisplayInfo.ForType( node );
 
-			if ( !SandMixTool.Debug && display.Group == "Debug" )
+			if ( !SandMixTool.Debug && display.Group == "#smix.node.category.debug" )
 			{
 				continue;
 			}
 
-			var groupName = display.Group ?? "Other";
+			var groupName = Util.GetLocalized( display.Group ?? "#smix.node.category.other" );
 
 			var group = groups.Where( g => g.Name == groupName ).FirstOrDefault();
 			if ( group is null )
@@ -194,8 +194,8 @@ public class GraphView : GraphicsView
 
 			foreach ( var item in group.Items )
 			{
-				var action = subMenu.AddOption( item.DisplayInfo.Name, item.DisplayInfo.Icon );
-				action.StatusText = item.DisplayInfo.Description;
+				var action = subMenu.AddOption( Util.GetLocalized( item.DisplayInfo.Name ), item.DisplayInfo.Icon );
+				action.StatusText = Util.GetLocalized( item.DisplayInfo.Description );
 				action.Triggered = item.Action;
 			}
 		}
@@ -213,7 +213,7 @@ public class GraphView : GraphicsView
 		if ( SelectedItems.Any() )
 		{
 			menu.AddSeparator();
-			var action = menu.AddOption( "Delete selection" );
+			var action = menu.AddOption( Util.GetLocalized( "#smix.ui.graphview.deleteselection" ) );
 			action.Triggered = GraphDelete;
 		}
 

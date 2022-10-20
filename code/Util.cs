@@ -1,4 +1,6 @@
-﻿using Tools;
+﻿using Sandbox;
+using System.Collections.Generic;
+using Tools;
 
 namespace SandMix.Tool;
 
@@ -24,5 +26,35 @@ internal static class Util
 		Paint.Target( null );
 
 		return icon;
+	}
+
+	public static string GetLocalized( string textToken )
+	{
+		if ( string.IsNullOrEmpty( textToken ) )
+		{
+			return null;
+		}
+
+		if ( !textToken.StartsWith('#') )
+		{
+			return textToken;
+		}
+
+		return Language.GetPhrase( textToken.Substring( 1 ) );
+	}
+
+	public static string GetLocalized( string textToken, Dictionary<string, object> data )
+	{
+		if ( string.IsNullOrEmpty( textToken ) )
+		{
+			return null;
+		}
+
+		if ( !textToken.StartsWith( '#' ) )
+		{
+			return textToken;
+		}
+
+		return Language.GetPhrase( textToken.Substring( 1 ), data );
 	}
 }

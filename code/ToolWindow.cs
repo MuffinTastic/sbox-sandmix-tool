@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Tools;
 using SandMix.Nodes;
 using SandMix.Tool.Widgets;
+using Sandbox;
 
 namespace SandMix.Tool;
 
@@ -67,69 +68,70 @@ public class ToolWindow : Window, IAssetEditor
 
 		MenuOptions = new MenuBarOptions();
 
-		var file = MenuBar.AddMenu( "File" );
+		var file = MenuBar.AddMenu( Util.GetLocalized( "#smix.ui.menubar.file" ) );
 		{
-			var newMix = file.AddOption( "New Mix" );
-			newMix.Triggered += () => _ = File.FileNew( GraphType.Mix );
-			newMix.Shortcut = "Ctrl+N";
+			var newMixGraph = file.AddOption( Util.GetLocalized( "#smix.ui.menubar.file.newmixgraph" ) );
+			newMixGraph.Triggered += () => _ = File.FileNew( GraphType.Mix );
+			newMixGraph.Shortcut = "Ctrl+N";
 
-			var newEffect = file.AddOption( "New Effect" );
-			newEffect.Triggered += () => _ = File.FileNew( GraphType.Effect );
-			newEffect.Shortcut = "Ctrl+Shift+N";
+			var newEffectGraph = file.AddOption( Util.GetLocalized( "#smix.ui.menubar.file.neweffectgraph" ) );
+			newEffectGraph.Triggered += () => _ = File.FileNew( GraphType.Effect );
+			newEffectGraph.Shortcut = "Ctrl+Shift+N";
 
-			var open = file.AddOption( "Open" );
+			var open = file.AddOption( Util.GetLocalized( "#smix.ui.menubar.file.open" ) );
 			open.Triggered += () => _ = File.FileOpen();
 			open.Shortcut = "Ctrl+O";
 
 			file.AddSeparator();
 
-			MenuOptions.FileCloseOption = file.AddOption( "Close" );
+			MenuOptions.FileCloseOption = file.AddOption( Util.GetLocalized( "#smix.ui.menubar.file.close" ) );
 			MenuOptions.FileCloseOption.Triggered += () => _ = File.FileClose();
 
 			file.AddSeparator();
 
-			MenuOptions.FileSaveOption = new Option( title: "Save", icon: null, action: () => File.Save() );
+			MenuOptions.FileSaveOption = file.AddOption( Util.GetLocalized( "#smix.ui.menubar.file.save" ) );
+			MenuOptions.FileSaveOption.Triggered += () => File.Save();
 			MenuOptions.FileSaveOption.Shortcut = "Ctrl+S";
-			file.AddOption( MenuOptions.FileSaveOption );
 
-			MenuOptions.FileSaveAsOption = new Option( title: "Save As", icon: null, action: () => File.SaveAs() );
-			file.AddOption( MenuOptions.FileSaveAsOption );
+			MenuOptions.FileSaveAsOption = file.AddOption( Util.GetLocalized( "#smix.ui.menubar.file.saveas" ) );
+			MenuOptions.FileSaveAsOption.Triggered += () => File.SaveAs();
 
 			file.AddSeparator();
 
-			file.AddOption( "Quit" ).Triggered += () => Close();
+			var quit = file.AddOption( Util.GetLocalized( "#smix.ui.menubar.file.quit" ) );
+			quit.Triggered += () => Close();
 		}
 
-		var edit = MenuBar.AddMenu( "Edit" );
+		var edit = MenuBar.AddMenu( Util.GetLocalized( "#smix.ui.menubar.edit" ) );
 		{
-			MenuOptions.EditUndoOption = new Option( title: "Undo", icon: null, action: () => File.EditUndo() );
+			MenuOptions.EditUndoOption = edit.AddOption( Util.GetLocalized( "#smix.ui.menubar.edit.undo" ) );
+			MenuOptions.EditUndoOption.Triggered += () => File.EditUndo();
 			MenuOptions.EditUndoOption.Shortcut = "Ctrl+Z";
-			edit.AddOption( MenuOptions.EditUndoOption );
 
-			MenuOptions.EditRedoOption = new Option( title: "Redo", icon: null, action: () => File.EditRedo() );
+			MenuOptions.EditRedoOption = edit.AddOption( Util.GetLocalized( "#smix.ui.menubar.edit.redo" ) );
+			MenuOptions.EditRedoOption.Triggered += () => File.EditRedo();
 			MenuOptions.EditRedoOption.Shortcut = "Ctrl+Y";
-			edit.AddOption( MenuOptions.EditRedoOption );
 
 			edit.AddSeparator();
 
-			MenuOptions.EditCutOption = new Option( title: "Cut", icon: null, action: () => File.EditCut() );
+			MenuOptions.EditCutOption = edit.AddOption( Util.GetLocalized( "#smix.ui.menubar.edit.cut" ) );
+			MenuOptions.EditCutOption.Triggered += () => File.EditCut();
 			MenuOptions.EditCutOption.Shortcut = "Ctrl+X";
-			edit.AddOption( MenuOptions.EditCutOption );
 
-			MenuOptions.EditCopyOption = new Option( title: "Copy", icon: null, action: () => File.EditCopy() );
+			MenuOptions.EditCopyOption = edit.AddOption( Util.GetLocalized( "#smix.ui.menubar.edit.copy" ) );
+			MenuOptions.EditCopyOption.Triggered += () => File.EditCopy();
 			MenuOptions.EditCopyOption.Shortcut = "Ctrl+C";
-			edit.AddOption( MenuOptions.EditCopyOption );
 
-			MenuOptions.EditPasteOption = new Option( title: "Paste", icon: null, action: () => File.EditPaste() );
+			MenuOptions.EditPasteOption = edit.AddOption( Util.GetLocalized( "#smix.ui.menubar.edit.paste" ) );
+			MenuOptions.EditPasteOption.Triggered += () => File.EditPaste();
 			MenuOptions.EditPasteOption.Shortcut = "Ctrl+V";
-			edit.AddOption( MenuOptions.EditPasteOption );
 
-			MenuOptions.EditDeleteOption = new Option( title: "Delete", icon: null, action: () => File.EditDelete() );
+			MenuOptions.EditDeleteOption = edit.AddOption( Util.GetLocalized( "#smix.ui.menubar.edit.delete" ) );
+			MenuOptions.EditDeleteOption.Triggered += () => File.EditDelete();
 			MenuOptions.EditDeleteOption.Shortcut = "Del";
-			edit.AddOption( MenuOptions.EditDeleteOption );
 		}
 
-		var view = MenuBar.AddMenu( "View" );
+		var view = MenuBar.AddMenu( Util.GetLocalized( "#smix.ui.menubar.view" ) );
 		{
 			view.AddOption( File.GetToggleViewOption() );
 
@@ -140,15 +142,18 @@ public class ToolWindow : Window, IAssetEditor
 
 			view.AddSeparator();
 
-			MenuOptions.ViewRecenterGraphViewOption = new Option( title: "Recenter Graph View", icon: null, action: () => File.RecenterGraphView() );
-			view.AddOption( MenuOptions.ViewRecenterGraphViewOption );
+			MenuOptions.ViewRecenterGraphViewOption = view.AddOption( Util.GetLocalized( "#smix.ui.menubar.view.recentergraphview" ) );
+			MenuOptions.ViewRecenterGraphViewOption.Triggered += () => File.RecenterGraphView();
 		}
 
-		var help = MenuBar.AddMenu( "Help" );
+		var help = MenuBar.AddMenu( Util.GetLocalized( "#smix.ui.menubar.help" ) );
 		{
-			help.AddOption( "Documentation" );
+			var documentation = help.AddOption( Util.GetLocalized( "#smix.ui.menubar.help.documentation" ) );
+			
 			help.AddSeparator();
-			help.AddOption( "About" ).Triggered += () => new Dialogs.AboutDialog( this ).Show();
+
+			var about = help.AddOption( Util.GetLocalized( "#smix.ui.menubar.help.about", new() { ["ProjectName"] = SandMix.ProjectName } ) );
+			about.Triggered += () => new Dialogs.AboutDialog( this ).Show();
 		}
 	}
 

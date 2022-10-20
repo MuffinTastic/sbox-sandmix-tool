@@ -216,14 +216,14 @@ public class PropertySheet : Widget
 		if ( w != null )
 		{
 			var row = new PropertyRow( this );
-			row.SetLabel( di );
+			row.SetLabel( Util.GetLocalized( di.Name ) );
 			row.SetWidget( w );
 
 			row.ToolTip = di.Description;
 			row.StatusTip = di.Description;
 			AddRow( row, prop );
 
-			w.Name = $"{prop.Name}";
+			w.Name = Util.GetLocalized( di.Name );
 
 			if ( !prop.CanWrite )
 			{
@@ -246,7 +246,7 @@ public class PropertySheet : Widget
 		{
 			var t = target;
 			var expander = new ExpandGroup( this );
-			expander.Title = di.Name;
+			expander.Title = Util.GetLocalized( di.Name );
 			expander.OnCreateWidget += () =>
 			{
 				var pg = new PropertySheet( expander );

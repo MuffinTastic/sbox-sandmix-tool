@@ -1,0 +1,9 @@
+{
+    "smix.node.nodescription" : "No description",
+
+    "smix.node.name" : "Name",
+    "smix.node.comment" : "Comment",
+
+    "smix.node.input" : "Input",
+    "smix.node.output" : "Output"
+}

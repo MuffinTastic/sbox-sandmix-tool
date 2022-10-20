@@ -1,4 +1,6 @@
-﻿using Tools;
+﻿using Sandbox;
+using System.Text;
+using Tools;
 
 namespace SandMix.Tool.Dialogs;
 
@@ -12,6 +14,7 @@ public class AboutDialog : Dialog
 		Window.IsDialog = true;
 		Window.MaximumSize = Size;
 		Window.Title = $"About {SandMix.ProjectName}";
+		Window.Title = Util.GetLocalized( "#smix.ui.about", new() { ["ProjectName"] = SandMix.ProjectName } );
 		Window.SetModal( true );
 
 		Window.SetWindowIcon( Util.RenderIcon( "info" ) );
@@ -40,12 +43,18 @@ public class AboutDialog : Dialog
 			titleVersionLabel.Alignment = TextFlag.CenterHorizontally;
 			l.Add( titleVersionLabel );
 
-			var authorsLabel = new Label( infoArea.Canvas );
-			authorsLabel.Text = "Authors:\n";
+			var sb = new StringBuilder();
+			sb.Append( Util.GetLocalized( "#smix.ui.about.authors" ) );
+			sb.Append( ":\n" );
+
 			foreach ( var author in SandMix.Authors )
 			{
-				authorsLabel.Text += $"{author}\n";
+				sb.Append( author );
+				sb.Append( "\n" );
 			}
+
+			var authorsLabel = new Label( infoArea.Canvas );
+			authorsLabel.Text = sb.ToString();
 			authorsLabel.Alignment = TextFlag.CenterHorizontally;
 			l.Add( authorsLabel );
 
@@ -55,7 +64,7 @@ public class AboutDialog : Dialog
 		Layout.Add( infoArea );
 
 		var repoButton = new Button( this );
-		repoButton.Text = "Visit repo";
+		repoButton.Text = Util.GetLocalized( "#smix.ui.about.visitrepo" );
 		repoButton.Clicked += () => Utility.OpenFolder( SandMix.ProjectRepoURL );
 		repoButton.ToolTip = SandMix.ProjectRepoURL;
 		Layout.Add( repoButton );

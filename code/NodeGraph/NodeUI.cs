@@ -68,14 +68,15 @@ public partial class NodeUI : Tools.GraphicsItem
 
 		var tooltipBuilder = new StringBuilder();
 
-		tooltipBuilder.Append( DisplayInfo.Name );
+		tooltipBuilder.Append( Util.GetLocalized( DisplayInfo.Name ) );
 		tooltipBuilder.Append( '\n' );
-		tooltipBuilder.Append( DisplayInfo.Description ?? "No Description" );
+		tooltipBuilder.Append( Util.GetLocalized( DisplayInfo.Description ?? "#smix.node.nodescription" ) );
 
 		if ( !string.IsNullOrEmpty( Node.Name ) )
 		{
 			tooltipBuilder.Append( '\n' );
-			tooltipBuilder.Append( "Name: " );
+			tooltipBuilder.Append( Util.GetLocalized( "#smix.node.name" ) );
+			tooltipBuilder.Append( ": " );
 			tooltipBuilder.Append( Node.Name );
 		}
 
@@ -84,7 +85,8 @@ public partial class NodeUI : Tools.GraphicsItem
 			tooltipBuilder.Append( '\n' );
 
 			var commentBuilder = new StringBuilder();
-			commentBuilder.Append( "Comment: " );
+			commentBuilder.Append( Util.GetLocalized( "#smix.node.comment" ) );
+			commentBuilder.Append( ": " );
 
 			var curLen = commentBuilder.Length;
 			const int rows = 64;
@@ -198,7 +200,7 @@ public partial class NodeUI : Tools.GraphicsItem
 				rect.Left += 18;
 			}
 
-			var title = DisplayInfo.Name;
+			var title = Util.GetLocalized( DisplayInfo.Name );
 			if ( !String.IsNullOrEmpty( Node.Name ) )
 				title += $" - {Node.Name}";
 

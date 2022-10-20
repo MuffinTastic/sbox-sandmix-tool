@@ -28,7 +28,7 @@ public class PlugUI : GraphicsItem
 		Property = property;
 
 		var display = Sandbox.DisplayInfo.ForMember( property );
-		Title = display.Name;
+		Title = Util.GetLocalized( display.Name );
 
 		HandleConfig = node.Graph.GetHandleConfig( property.PropertyType );
 	}

@@ -21,8 +21,10 @@ public class InspectorWidget : DockWidget
 	public string CurrentTime => System.DateTime.Now.ToString();
 
 
-	public InspectorWidget( Widget parent = null ) : base( "Inspector", "manage_search", parent )
+	public InspectorWidget( Widget parent = null ) : base( null, "manage_search", parent )
 	{
+		Title = Util.GetLocalized( "#smix.ui.inspector" );
+
 		Widget = new Widget( this );
 
 		Widget.SetLayout( LayoutMode.TopToBottom );
@@ -108,7 +110,7 @@ public class InspectorWidget : DockWidget
 		}
 
 		var display = DisplayInfo.ForType( node?.GetType() );
-		Header.title.Text = display.Name ?? "";
+		Header.title.Text = Util.GetLocalized( display.Name ) ?? "";
 
 		// keep buttons updates
 		UpdateBackForward();

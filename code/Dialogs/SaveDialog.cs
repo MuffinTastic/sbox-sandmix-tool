@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sandbox;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -23,7 +24,7 @@ public class SaveDialog : Dialog
 		Window.Size = new Vector2( 400, 120 );
 		Window.IsDialog = true;
 		Window.MaximumSize = Size;
-		Window.Title = "Save changes?";
+		Window.Title = Util.GetLocalized( "#smix.ui.save" );
 		Window.SetModal( true );
 
 		Window.SetWindowIcon( Util.RenderIcon( "save" ) );
@@ -40,28 +41,25 @@ public class SaveDialog : Dialog
 		Layout.Margin = 10;
 		Layout.Spacing = 10;
 
-		var warningLabel = new Label( this );
-		warningLabel.Text =
-			"There are unsaved changes!\n" +
-			"\n" +
-			"Do you wish to save them?";
-		Layout.Add( warningLabel );
+		var messageLabel = new Label( this );
+		messageLabel.Text = Util.GetLocalized( "#smix.ui.save.message" );
+		Layout.Add( messageLabel );
 
 		var hl = Layout.Add( LayoutMode.LeftToRight );
 		hl.Spacing = 4;
 		{
 			var yesButton = new Button( this );
-			yesButton.Text = "Yes";
+			yesButton.Text = Util.GetLocalized( "#smix.ui.save.yes" );
 			yesButton.Clicked += () => Triggered( Result.Yes );
 			hl.Add( yesButton, 1 );
 
 			var noButton = new Button( this );
-			noButton.Text = "No";
+			noButton.Text = Util.GetLocalized( "#smix.ui.save.no" );
 			noButton.Clicked += () => Triggered( Result.No );
 			hl.Add( noButton, 1 );
 
 			var cancelButton = new Button( this );
-			cancelButton.Text = "Cancel";
+			cancelButton.Text = Util.GetLocalized( "#smix.ui.save.cancel" );
 			cancelButton.Clicked += () => Triggered( Result.Cancel );
 			hl.Add( cancelButton, 1 );
 		}

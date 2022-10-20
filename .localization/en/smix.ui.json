@@ -1,0 +1,44 @@
+{
+    "smix.ui.menubar.file" : "File",
+    "smix.ui.menubar.file.newmixgraph" : "New Mix Graph",
+    "smix.ui.menubar.file.neweffectgraph" : "New Effect Graph",
+    "smix.ui.menubar.file.open" : "Open",
+    "smix.ui.menubar.file.close" : "Close",
+    "smix.ui.menubar.file.save" : "Save",
+    "smix.ui.menubar.file.saveas" : "Save As",
+    "smix.ui.menubar.file.quit" : "Quit",
+
+    "smix.ui.menubar.edit" : "Edit",
+    "smix.ui.menubar.edit.undo" : "Undo",
+    "smix.ui.menubar.edit.redo" : "Redo",
+    "smix.ui.menubar.edit.cut" : "Cut",
+    "smix.ui.menubar.edit.copy" : "Copy",
+    "smix.ui.menubar.edit.paste" : "Paste",
+    "smix.ui.menubar.edit.delete" : "Delete",
+
+    "smix.ui.menubar.view" : "View",
+    "smix.ui.menubar.view.recentergraphview" : "Recenter Graph View",
+
+    "smix.ui.menubar.help" : "Help",
+    "smix.ui.menubar.help.documentation" : "Documentation",
+    "smix.ui.menubar.help.about" : "About",
+    
+    "smix.ui.save" : "Save changes?",
+    "smix.ui.save.message": "There are unsaved changes! Do you wish to save them?",
+    "smix.ui.save.yes" : "Yes",
+    "smix.ui.save.no" : "No",
+    "smix.ui.save.cancel" : "Cancel",
+
+    "smix.ui.about" : "About {ProjectName}",
+    "smix.ui.about.authors" : "Authors",
+    "smix.ui.about.visitrepo" : "Visit repo",
+
+    "smix.ui.graphview" : "Graph View",
+    "smix.ui.inspector" : "Inspector",
+    "smix.ui.preview" : "Preview",
+
+    "smix.ui.newmixgraph" : "New Mix Graph",
+    "smix.ui.neweffectgraph" : "New Effect Graph",
+
+    "smix.ui.graphview.deleteselection" : "Delete selection"
+}

@@ -1,0 +1,11 @@
+{
+    "smix.node.category.debug" : "Debug",
+    "smix.node.category.other" : "Other",
+    
+    "smix.node.category.effects" : "Effects",
+    "smix.node.category.io" : "I/O",
+
+    "smix.node.category.audio" : "Audio",
+    "smix.node.category.inputs" : "Inputs",
+    "smix.node.category.maths" : "Maths"
+}

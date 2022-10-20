@@ -66,7 +66,7 @@ public class FileWidget : DockWidget
 		var icon = Graph.GraphType switch
 		{
 			GraphType.Mix => MixGraphResource.Icon,
-			GraphType.Effect => EffectResource.Icon,
+			GraphType.Effect => EffectGraphResource.Icon,
 			_ => throw new Exception( "Unknown graph type" )
 		};
 
@@ -286,7 +286,7 @@ public class FileWidget : DockWidget
 		var extension = Graph.GraphType switch
 		{
 			GraphType.Mix => MixGraphResource.FileExtension,
-			GraphType.Effect => EffectResource.FileExtension,
+			GraphType.Effect => EffectGraphResource.FileExtension,
 			_ => throw new Exception( "Unknown graph type" )
 		};
 

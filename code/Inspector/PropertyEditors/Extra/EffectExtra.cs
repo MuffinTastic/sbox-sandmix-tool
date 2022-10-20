@@ -2,7 +2,7 @@
 
 namespace SandMix.Tool.Inspector.PropertyEditors;
 
-[SandMixInspector( $"assetextra:{EffectResource.FileExtension}" )]
+[SandMixInspector( $"assetextra:{EffectGraphResource.FileExtension}" )]
 public class EffectExtra : Widget
 {
 	Asset asset;

@@ -7,7 +7,7 @@ using SandMix.Tool.Widgets;
 namespace SandMix.Tool;
 
 [CanEdit( $"asset:{MixGraphResource.FileExtension}" )]
-[CanEdit( $"asset:{EffectResource.FileExtension}" )]
+[CanEdit( $"asset:{EffectGraphResource.FileExtension}" )]
 [Tool( SandMix.ProjectName, SandMixTool.BaseIcon, SandMix.ProjectTagline )]
 public class ToolWindow : Window, IAssetEditor
 {

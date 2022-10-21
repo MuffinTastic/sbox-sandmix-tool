@@ -145,6 +145,8 @@ public class FileWidget : DockWidget
 		GraphView = null;
 		Graph = null;
 		Asset = null;
+
+		Inspector.StartInspecting( null );
 	}
 
 	private void WriteAsset()

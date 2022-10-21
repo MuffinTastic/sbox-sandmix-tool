@@ -1,0 +1,4 @@
+{
+    "smix.node.effectoutput" : "Effect Output",
+    "smix.node.effectoutput.description" : "Output for the effect graph"
+}

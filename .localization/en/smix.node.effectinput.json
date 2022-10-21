@@ -1,0 +1,4 @@
+{
+    "smix.node.effectinput" : "Effect Input",
+    "smix.node.effectinput.description" : "Input to the effect graph"
+}

@@ -1,0 +1,4 @@
+{
+    "smix.node.floatinput" : "Float Input",
+    "smix.node.floatinput.description" : "Variable float input, supplied by game code"
+}

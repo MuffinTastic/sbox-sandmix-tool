@@ -1,0 +1,6 @@
+{
+    "smix.node.floatrandom" : "Random Float",
+    "smix.node.floatrandom.description" : "Generate a random float number within a range",
+    "smix.node.floatrandom.min" : "Min",
+    "smix.node.floatrandom.max" : "Max"
+}

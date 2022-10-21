@@ -1,0 +1,4 @@
+{
+    "smix.node.floatadd" : "Add Float",
+    "smix.node.floatadd.description" : "Add two floats together"
+}

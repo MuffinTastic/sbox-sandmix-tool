@@ -1,4 +1,5 @@
 {
     "smix.node.mixeffectnode" : "Effect",
+    "smix.node.mixeffectnode.description" : "Apply an effect to the audio stream",
     "smix.node.mixeffectnode.effect" : "Effect"
 }

@@ -1,0 +1,6 @@
+{
+    "smix.node.echoeffect" : "Echo",
+    "smix.node.echoeffect.description" : "Apply an echo effect to the audio stream",
+    "smix.node.echoeffect.delay" : "Delay",
+    "smix.node.echoeffect.feedback" : "Feedback"
+}

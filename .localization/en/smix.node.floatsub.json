@@ -1,0 +1,4 @@
+{
+    "smix.node.floatsub" : "Subtract Float",
+    "smix.node.floatsub.description" : "Subtract one float from another"
+}

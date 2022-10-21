@@ -1,0 +1,4 @@
+{
+    "smix.node.floatconstant" : "Float Constant",
+    "smix.node.floatconstant.description" : "Constant float input"
+}

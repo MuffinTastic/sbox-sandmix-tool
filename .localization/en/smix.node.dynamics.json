@@ -1,0 +1,11 @@
+{
+    "smix.node.dynamics" : "Dynamics",
+    "smix.node.dynamics.description" : "Apply dynamics to the audio stream (compression/limiting/expansion/noise gate)",
+    "smix.node.dynamics.mode" : "Mode",
+    "smix.node.dynamics.threshold" : "Threshold",
+    "smix.node.dynamics.ratio" : "Ratio",
+    "smix.node.dynamics.makeupgain" : "Makeup Gain",
+    "smix.node.dynamics.attack" : "Attack",
+    "smix.node.dynamics.release" : "Release",
+    "smix.node.dynamics.minamplitudedb" : "Min Amplitude dB"
+}

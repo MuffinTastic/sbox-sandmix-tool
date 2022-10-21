@@ -1,0 +1,5 @@
+{
+    "smix.node.tracknode" : "Track",
+    "smix.node.tracknode.description" : "Audio track - Sources from a .vsnd file",
+    "smix.node.tracknode.track" : "Track"
+}

@@ -1,0 +1,4 @@
+{
+    "smix.node.vec3add" : "Add Vector3",
+    "smix.node.vec3add.description" : "Add two Vector3s together"
+}

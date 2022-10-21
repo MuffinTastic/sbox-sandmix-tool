@@ -116,8 +116,8 @@ public class GraphView : GraphicsView
 
 		var baseNodeType = Graph.GraphType switch
 		{
-			GraphType.Mix => typeof( BaseMixNode ),
-			GraphType.Effect => typeof( BaseEffectNode ),
+			GraphType.Mix => typeof( BaseMixGraphNode ),
+			GraphType.Effect => typeof( BaseEffectGraphNode ),
 			_ => throw new Exception( "Unknown graph type" )
 		};
 

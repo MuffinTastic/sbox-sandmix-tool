@@ -1,0 +1,4 @@
+{
+    "smix.node.audiooutput" : "Audio Output",
+    "smix.node.audiooutput.description" : "Plays the output of the mix as a single ingame sound stream"
+}

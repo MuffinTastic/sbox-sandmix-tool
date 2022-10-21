@@ -8,31 +8,38 @@ public static class SandMixTool
 
 	public static string GetFindFileFilter()
 	{
-		var mixGraph = Util.GetLocalized( "#smix.ui.filter.mixgraph" );
-		var effectGraph = Util.GetLocalized( "#smix.ui.filter.effectgraph" );
-
-		return
-			$"All {SandMix.ProjectName} (*.{MixGraphResource.FileExtension} *.{EffectGraphResource.FileExtension});;" +
-			$"{SandMix.ProjectName} {mixGraph} (*.{MixGraphResource.FileExtension});;" +
-			$"{SandMix.ProjectName} {effectGraph} (*.{EffectGraphResource.FileExtension});;" +
-			$"All files (*.*)";
+		return Util.GetLocalized(
+			"#smix.ui.filter.all",
+			new()
+			{
+				["ProjectName"] = SandMix.ProjectName,
+				["MixGraphFileExtension"] = MixGraphResource.FileExtension,
+				["EffectGraphFileExtension"] = EffectGraphResource.FileExtension
+			}
+		);
 	}
 	public static string GetSaveMixGraphFilter()
 	{
-		var mixGraph = Util.GetLocalized( "#smix.ui.filter.mixgraph" );
-
-		return
-			$"{SandMix.ProjectName} {mixGraph} (*.{MixGraphResource.FileExtension});;" +
-			$"All files (*.*)";
+		return Util.GetLocalized(
+			"#smix.ui.filter.mixgraph",
+			new()
+			{
+				["ProjectName"] = SandMix.ProjectName,
+				["MixGraphFileExtension"] = MixGraphResource.FileExtension
+			}
+		);
 	}
 
 	public static string GetSaveEffectGraphFilter()
 	{
-		var effectGraph = Util.GetLocalized( "#smix.ui.filter.effectgraph" );
-
-		return
-			$"{SandMix.ProjectName} {effectGraph} (*.{EffectGraphResource.FileExtension});;" +
-			$"All files (*.*)";
+		return Util.GetLocalized(
+			"#smix.ui.filter.effectgraph",
+			new()
+			{
+				["ProjectName"] = SandMix.ProjectName,
+				["EffectGraphFileExtension"] = EffectGraphResource.FileExtension
+			}
+		);
 	}
 
 	[ConVar.Engine( "smix_tool_debug" )]

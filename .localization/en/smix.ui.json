@@ -40,8 +40,9 @@
     "smix.ui.title.newmixgraph" : "New Mix Graph",
     "smix.ui.title.neweffectgraph" : "New Effect Graph",
 
-    "smix.ui.filter.mixgraph" : "mix graph",
-    "smix.ui.filter.effectgraph" : "effect graph",
+    "smix.ui.filter.all" : "All {ProjectName} (*.{MixGraphFileExtension} *.{EffectGraphFileExtension});;{ProjectName} mix graph (*.{MixGraphFileExtension});;{ProjectName} effect graph (*.{EffectGraphFileExtension});;All files (*.*)",
+    "smix.ui.filter.mixgraph" : "{ProjectName} mix graph (*.{MixGraphFileExtension});;All files (*.*)",
+    "smix.ui.filter.effectgraph" : "{ProjectName} effect graph (*.{EffectGraphFileExtension});;All files (*.*)",
 
     "smix.ui.graphview.deleteselection" : "Delete selection"
 }

@@ -37,8 +37,11 @@
     "smix.ui.inspector" : "Inspector",
     "smix.ui.preview" : "Preview",
 
-    "smix.ui.newmixgraph" : "New Mix Graph",
-    "smix.ui.neweffectgraph" : "New Effect Graph",
+    "smix.ui.title.newmixgraph" : "New Mix Graph",
+    "smix.ui.title.neweffectgraph" : "New Effect Graph",
+
+    "smix.ui.filter.mixgraph" : "mix graph",
+    "smix.ui.filter.effectgraph" : "effect graph",
 
     "smix.ui.graphview.deleteselection" : "Delete selection"
 }

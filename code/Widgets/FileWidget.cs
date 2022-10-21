@@ -81,8 +81,8 @@ public class FileWidget : DockWidget
 		{
 			title = Graph.GraphType switch
 			{
-				GraphType.Mix => Util.GetLocalized( "#smix.ui.newmixgraph" ),
-				GraphType.Effect => Util.GetLocalized( "#smix.ui.neweffectgraph" ),
+				GraphType.Mix => Util.GetLocalized( "#smix.ui.title.newmixgraph" ),
+				GraphType.Effect => Util.GetLocalized( "#smix.ui.title.neweffectgraph" ),
 				_ => throw new Exception( "Unknown graph type" )
 			};
 		}
@@ -184,7 +184,7 @@ public class FileWidget : DockWidget
 			var fd = new FileDialog( this );
 
 			fd.Title = $"Open";
-			fd.SetNameFilter( SandMixTool.FindFileFilter );
+			fd.SetNameFilter( SandMixTool.GetFindFileFilter() );
 			fd.SetFindExistingFile();
 
 			if ( !fd.Execute() ) // canceled by user
@@ -282,8 +282,8 @@ public class FileWidget : DockWidget
 	{
 		var filter = Graph.GraphType switch
 		{
-			GraphType.Mix => SandMixTool.SaveMixGraphFilter,
-			GraphType.Effect => SandMixTool.SaveEffectFilter,
+			GraphType.Mix => SandMixTool.GetSaveMixGraphFilter(),
+			GraphType.Effect => SandMixTool.GetSaveEffectGraphFilter(),
 			_ => throw new Exception( "Unknown graph type" )
 		};
 

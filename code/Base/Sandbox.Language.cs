@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Sandbox.Localization;
 using Tools;
@@ -33,7 +34,7 @@ namespace Sandbox
         internal static void Tick()
         {
             string text = ConsoleSystem.GetValue( "language", "en" );
-            if ( text == null )
+            if ( string.IsNullOrEmpty( text ) )
             {
                 text = "en";
             }
@@ -47,10 +48,10 @@ namespace Sandbox
                 // if ( text != "en" )
                 // {
                     AddFromPath( text );
-                // }
+				// }
 
-                Event.Run( "language.changed" );
-            }
+				Event.Run( "language.changed" );
+			}
         }
 
         private static void AddFromPath( string shortName )

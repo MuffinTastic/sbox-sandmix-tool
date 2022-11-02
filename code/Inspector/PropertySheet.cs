@@ -95,8 +95,8 @@ public class PropertySheet : Widget
 
 				if ( !string.IsNullOrEmpty( prop.info.Description ) )
 				{
-					addedRow.StatusTip = prop.info.Description;
-					addedRow.ToolTip = prop.info.Description;
+					addedRow.StatusTip = Util.GetLocalized( prop.info.Description );
+					addedRow.ToolTip = Util.GetLocalized( prop.info.Description );
 				}
 			}
 		}
@@ -219,8 +219,8 @@ public class PropertySheet : Widget
 			row.SetLabel( Util.GetLocalized( di.Name ) );
 			row.SetWidget( w );
 
-			row.ToolTip = di.Description;
-			row.StatusTip = di.Description;
+			row.ToolTip = Util.GetLocalized( di.Description );
+			row.StatusTip = Util.GetLocalized( di.Description );
 			AddRow( row, prop );
 
 			w.Name = Util.GetLocalized( di.Name );
@@ -352,6 +352,6 @@ public class PropertySheet : Widget
 		OnUpdateRowVisibility?.Invoke();
 		PropertyUpdated?.Invoke();
 
-		Utility.NoteObjectEdited( Target );
+		// Utility.NoteObjectEdited( Target );
 	}
 }

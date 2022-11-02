@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using Sandbox;
+using System.Reflection;
 using Tools;
 
 namespace SandMix.Tool.NodeGraph;
@@ -27,10 +28,21 @@ public class PlugUI : GraphicsItem
 		Node = node;
 		Property = property;
 
-		var display = Sandbox.DisplayInfo.ForMember( property );
-		Title = Util.GetLocalized( display.Name );
+		SetTitle();
 
 		HandleConfig = node.Graph.GetHandleConfig( property.PropertyType );
+	}
+
+	private void SetTitle()
+	{
+		var display = Sandbox.DisplayInfo.ForMember( Property );
+		Title = Util.GetLocalized( display.Name );
+	}
+
+	public void UpdateLanguage()
+	{
+		SetTitle();
+		Update();
 	}
 
 	protected void DrawHandle( in Color color, in Rect handleRect )

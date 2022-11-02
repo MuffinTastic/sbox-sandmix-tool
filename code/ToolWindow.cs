@@ -20,10 +20,16 @@ public class ToolWindow : Window, IAssetEditor
 
 	public struct MenuBarOptions
 	{
+		public Menu File;
+		public Option FileNewMixGraph;
+		public Option FileNewEffectGraph;
+		public Option FileOpen;
 		public Option FileCloseOption;
 		public Option FileSaveOption;
 		public Option FileSaveAsOption;
+		public Option FileQuit;
 
+		public Menu Edit;
 		public Option EditUndoOption;
 		public Option EditRedoOption;
 		public Option EditCutOption;
@@ -31,8 +37,14 @@ public class ToolWindow : Window, IAssetEditor
 		public Option EditPasteOption;
 		public Option EditDeleteOption;
 
+		public Menu View;
 		public Option ViewPreviewOption;
 		public Option ViewRecenterGraphViewOption;
+
+		public Menu Help;
+		public Option HelpDocumentation;
+		public Option HelpAbout;
+
 	}
 
 	private MenuBarOptions MenuOptions;
@@ -68,93 +80,141 @@ public class ToolWindow : Window, IAssetEditor
 
 		MenuOptions = new MenuBarOptions();
 
-		var file = MenuBar.AddMenu( Util.GetLocalized( "#smix.ui.menubar.file" ) );
+		MenuOptions.File = MenuBar.AddMenu( "" );
 		{
-			var newMixGraph = file.AddOption( Util.GetLocalized( "#smix.ui.menubar.file.newmixgraph" ) );
-			newMixGraph.Triggered += () => _ = File.FileNew( GraphType.Mix );
-			newMixGraph.Shortcut = "Ctrl+N";
+			MenuOptions.FileNewMixGraph = MenuOptions.File.AddOption( "_newmixgraph" );
+			MenuOptions.FileNewMixGraph.Triggered += () => _ = File.FileNew( GraphType.Mix );
+			MenuOptions.FileNewMixGraph.Shortcut = "Ctrl+N";
 
-			var newEffectGraph = file.AddOption( Util.GetLocalized( "#smix.ui.menubar.file.neweffectgraph" ) );
-			newEffectGraph.Triggered += () => _ = File.FileNew( GraphType.Effect );
-			newEffectGraph.Shortcut = "Ctrl+Shift+N";
+			MenuOptions.FileNewEffectGraph = MenuOptions.File.AddOption( "_neweffectgraph" );
+			MenuOptions.FileNewEffectGraph.Triggered += () => _ = File.FileNew( GraphType.Effect );
+			MenuOptions.FileNewEffectGraph.Shortcut = "Ctrl+Shift+N";
 
-			var open = file.AddOption( Util.GetLocalized( "#smix.ui.menubar.file.open" ) );
-			open.Triggered += () => _ = File.FileOpen();
-			open.Shortcut = "Ctrl+O";
+			MenuOptions.FileOpen = MenuOptions.File.AddOption( "_open" );
+			MenuOptions.FileOpen.Triggered += () => _ = File.FileOpen();
+			MenuOptions.FileOpen.Shortcut = "Ctrl+O";
 
-			file.AddSeparator();
+			MenuOptions.File.AddSeparator();
 
-			MenuOptions.FileCloseOption = file.AddOption( Util.GetLocalized( "#smix.ui.menubar.file.close" ) );
+			MenuOptions.FileCloseOption = MenuOptions.File.AddOption( "_close" );
 			MenuOptions.FileCloseOption.Triggered += () => _ = File.FileClose();
 
-			file.AddSeparator();
+			MenuOptions.File.AddSeparator();
 
-			MenuOptions.FileSaveOption = file.AddOption( Util.GetLocalized( "#smix.ui.menubar.file.save" ) );
+			MenuOptions.FileSaveOption = MenuOptions.File.AddOption( "_save" );
 			MenuOptions.FileSaveOption.Triggered += () => File.Save();
 			MenuOptions.FileSaveOption.Shortcut = "Ctrl+S";
 
-			MenuOptions.FileSaveAsOption = file.AddOption( Util.GetLocalized( "#smix.ui.menubar.file.saveas" ) );
+			MenuOptions.FileSaveAsOption = MenuOptions.File.AddOption( "_saveas" );
 			MenuOptions.FileSaveAsOption.Triggered += () => File.SaveAs();
 
-			file.AddSeparator();
+			MenuOptions.File.AddSeparator();
 
-			var quit = file.AddOption( Util.GetLocalized( "#smix.ui.menubar.file.quit" ) );
-			quit.Triggered += () => Close();
+			MenuOptions.FileQuit = MenuOptions.File.AddOption( "_quit" );
+			MenuOptions.FileQuit.Triggered += () => Close();
 		}
 
-		var edit = MenuBar.AddMenu( Util.GetLocalized( "#smix.ui.menubar.edit" ) );
+		MenuOptions.Edit = MenuBar.AddMenu( "_edit" );
 		{
-			MenuOptions.EditUndoOption = edit.AddOption( Util.GetLocalized( "#smix.ui.menubar.edit.undo" ) );
+			MenuOptions.EditUndoOption = MenuOptions.Edit.AddOption( "_undo" );
 			MenuOptions.EditUndoOption.Triggered += () => File.EditUndo();
 			MenuOptions.EditUndoOption.Shortcut = "Ctrl+Z";
 
-			MenuOptions.EditRedoOption = edit.AddOption( Util.GetLocalized( "#smix.ui.menubar.edit.redo" ) );
+			MenuOptions.EditRedoOption = MenuOptions.Edit.AddOption( "_redo" );
 			MenuOptions.EditRedoOption.Triggered += () => File.EditRedo();
 			MenuOptions.EditRedoOption.Shortcut = "Ctrl+Y";
 
-			edit.AddSeparator();
+			MenuOptions.Edit.AddSeparator();
 
-			MenuOptions.EditCutOption = edit.AddOption( Util.GetLocalized( "#smix.ui.menubar.edit.cut" ) );
+			MenuOptions.EditCutOption = MenuOptions.Edit.AddOption( "_cut" );
 			MenuOptions.EditCutOption.Triggered += () => File.EditCut();
 			MenuOptions.EditCutOption.Shortcut = "Ctrl+X";
 
-			MenuOptions.EditCopyOption = edit.AddOption( Util.GetLocalized( "#smix.ui.menubar.edit.copy" ) );
+			MenuOptions.EditCopyOption = MenuOptions.Edit.AddOption( "_copy" );
 			MenuOptions.EditCopyOption.Triggered += () => File.EditCopy();
 			MenuOptions.EditCopyOption.Shortcut = "Ctrl+C";
 
-			MenuOptions.EditPasteOption = edit.AddOption( Util.GetLocalized( "#smix.ui.menubar.edit.paste" ) );
+			MenuOptions.EditPasteOption = MenuOptions.Edit.AddOption( "_paste" );
 			MenuOptions.EditPasteOption.Triggered += () => File.EditPaste();
 			MenuOptions.EditPasteOption.Shortcut = "Ctrl+V";
 
-			MenuOptions.EditDeleteOption = edit.AddOption( Util.GetLocalized( "#smix.ui.menubar.edit.delete" ) );
+			MenuOptions.EditDeleteOption = MenuOptions.Edit.AddOption( "_delete" );
 			MenuOptions.EditDeleteOption.Triggered += () => File.EditDelete();
 			MenuOptions.EditDeleteOption.Shortcut = "Del";
 		}
 
-		var view = MenuBar.AddMenu( Util.GetLocalized( "#smix.ui.menubar.view" ) );
+		MenuOptions.View = MenuBar.AddMenu( "_view" );
 		{
-			view.AddOption( File.GetToggleViewOption() );
+			MenuOptions.View.AddOption( File.GetToggleViewOption() );
 
 			MenuOptions.ViewPreviewOption = Preview.GetToggleViewOption();
-			view.AddOption( MenuOptions.ViewPreviewOption );
+			MenuOptions.View.AddOption( MenuOptions.ViewPreviewOption );
 
-			view.AddOption( Inspector.GetToggleViewOption() );
+			MenuOptions.View.AddOption( Inspector.GetToggleViewOption() );
 
-			view.AddSeparator();
+			MenuOptions.View.AddSeparator();
 
-			MenuOptions.ViewRecenterGraphViewOption = view.AddOption( Util.GetLocalized( "#smix.ui.menubar.view.recentergraphview" ) );
+			MenuOptions.ViewRecenterGraphViewOption = MenuOptions.View.AddOption( "_recentergraphview" );
 			MenuOptions.ViewRecenterGraphViewOption.Triggered += () => File.RecenterGraphView();
 		}
 
-		var help = MenuBar.AddMenu( Util.GetLocalized( "#smix.ui.menubar.help" ) );
+		MenuOptions.Help = MenuBar.AddMenu( "_help" );
 		{
-			var documentation = help.AddOption( Util.GetLocalized( "#smix.ui.menubar.help.documentation" ) );
-			
-			help.AddSeparator();
+			MenuOptions.HelpDocumentation = MenuOptions.Help.AddOption( "_documentation" );
 
-			var about = help.AddOption( Util.GetLocalized( "#smix.ui.menubar.help.about", new() { ["ProjectName"] = SandMix.ProjectName } ) );
-			about.Triggered += () => new Dialogs.AboutDialog( this ).Show();
+			MenuOptions.Help.AddSeparator();
+
+			MenuOptions.HelpAbout = MenuOptions.Help.AddOption( "_about" );
+			MenuOptions.HelpAbout.Triggered += () => new Dialogs.AboutDialog( this ).Show();
 		}
+
+		SetMenuText();
+	}
+
+	private void SetMenuText()
+	{
+		if ( MenuOptions.FileNewMixGraph == null ) return;
+		MenuOptions.File.Title							= Util.GetLocalized( "#smix.ui.menubar.file" );
+		MenuOptions.FileNewMixGraph.Text				= Util.GetLocalized( "#smix.ui.menubar.file.newmixgraph" );
+		MenuOptions.FileNewEffectGraph.Text				= Util.GetLocalized( "#smix.ui.menubar.file.neweffectgraph" );
+		MenuOptions.FileOpen.Text						= Util.GetLocalized( "#smix.ui.menubar.file.open" );
+		MenuOptions.FileCloseOption.Text				= Util.GetLocalized( "#smix.ui.menubar.file.close" );
+		MenuOptions.FileSaveOption.Text					= Util.GetLocalized( "#smix.ui.menubar.file.save" );
+		MenuOptions.FileSaveAsOption.Text				= Util.GetLocalized( "#smix.ui.menubar.file.saveas" );
+		MenuOptions.FileQuit.Text						= Util.GetLocalized( "#smix.ui.menubar.file.quit" );
+
+		MenuOptions.Edit.Title							= Util.GetLocalized( "#smix.ui.menubar.edit" );
+		MenuOptions.EditUndoOption.Text					= Util.GetLocalized( "#smix.ui.menubar.edit.undo" );
+		MenuOptions.EditRedoOption.Text					= Util.GetLocalized( "#smix.ui.menubar.edit.redo" );
+		MenuOptions.EditCutOption.Text					= Util.GetLocalized( "#smix.ui.menubar.edit.cut" );
+		MenuOptions.EditCopyOption.Text					= Util.GetLocalized( "#smix.ui.menubar.edit.copy" );
+		MenuOptions.EditPasteOption.Text				= Util.GetLocalized( "#smix.ui.menubar.edit.paste" );
+		MenuOptions.EditDeleteOption.Text				= Util.GetLocalized( "#smix.ui.menubar.edit.delete" );
+
+		MenuOptions.View.Title							= Util.GetLocalized( "#smix.ui.menubar.view" );
+		MenuOptions.ViewRecenterGraphViewOption.Text	= Util.GetLocalized( "#smix.ui.menubar.view.recentergraphview" );
+
+		MenuOptions.Help.Title							= Util.GetLocalized( "#smix.ui.menubar.help" );
+		MenuOptions.HelpDocumentation.Text				= Util.GetLocalized( "#smix.ui.menubar.help.documentation" );
+		MenuOptions.HelpAbout.Text						= Util.GetLocalized( "#smix.ui.menubar.help.about",
+															new() { ["ProjectName"] = SandMix.ProjectName }
+														);
+
+		Update();
+	}
+
+	[Event( "language.changed" )]
+	private void UpdateLanguage()
+	{
+		if ( !IsValid )
+		{
+			return;
+		}
+
+		SetMenuText();
+		File?.UpdateLanguage();
+		Preview?.UpdateLanguage();
+		Inspector?.UpdateLanguage();
 	}
 
 	public void CreateUI()
@@ -170,13 +230,14 @@ public class ToolWindow : Window, IAssetEditor
 		Inspector.MinimumSize = (Vector2) 300.0f;
 
 		File = new FileWidget( this, Preview, Inspector );
-		File.MinimumSize = (Vector2)300.0f;
+		File.MinimumSize = (Vector2) 300.0f;
 
 		Dock( File, DockArea.Left );
 		Dock( Inspector, DockArea.Left );
 		Dock( Preview, DockArea.Right );
 
 		Inspector.Height = Inspector.MinimumHeight;
+		Preview.Width = Preview.MinimumHeight;
 
 		BuildMenu();
 		File.SetMenuBarOptions( MenuOptions );

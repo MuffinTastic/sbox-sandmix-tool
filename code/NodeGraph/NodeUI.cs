@@ -1,4 +1,5 @@
-﻿using SandMix.Nodes;
+﻿using Sandbox;
+using SandMix.Nodes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -60,6 +61,26 @@ public partial class NodeUI : Tools.GraphicsItem
 		}
 
 		Layout();
+	}
+
+	public void UpdateLanguage()
+	{
+		if ( !IsValid )
+		{
+			return;
+		}
+
+		foreach ( var plug in Inputs )
+		{
+			plug.UpdateLanguage();
+		}
+
+		foreach ( var plug in Outputs )
+		{
+			plug.UpdateLanguage();
+		}
+
+		Update();
 	}
 
 	public void UpdateTooltip()

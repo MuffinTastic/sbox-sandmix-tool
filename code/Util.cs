@@ -1,5 +1,6 @@
 ﻿using Sandbox;
 using System.Collections.Generic;
+using System.Text;
 using Tools;
 
 namespace SandMix.Tool;
@@ -56,5 +57,84 @@ internal static class Util
 		}
 
 		return Language.GetPhrase( textToken.Substring( 1 ), data );
+	}
+
+	public static string GetFindFileFilter()
+	{
+		var sb = new StringBuilder();
+
+		var allproject = GetLocalized(
+			"#smix.ui.filter.allproject",
+			new()
+			{
+				["ProjectName"] = SandMix.ProjectName
+			}
+		);
+
+		sb.Append( allproject );
+		sb.Append( " (*." );
+		sb.Append( MixGraphResource.FileExtension );
+		sb.Append( " *." );
+		sb.Append( EffectGraphResource.FileExtension );
+		sb.Append( ")" );
+
+		sb.Append( ";;" );
+
+		sb.Append( GetAllFiles() );
+
+		return sb.ToString();
+	}
+
+	public static string GetSaveMixGraphFilter()
+	{
+		var sb = new StringBuilder();
+
+		var mixGraph = GetLocalized(
+			"#smix.ui.filter.mixgraph",
+			new()
+			{
+				["ProjectName"] = SandMix.ProjectName
+			}
+		);
+
+		sb.Append( mixGraph );
+		sb.Append( " (*." );
+		sb.Append( MixGraphResource.FileExtension );
+		sb.Append( ")" );
+
+		sb.Append( ";;" );
+
+		sb.Append( GetAllFiles() );
+
+		return sb.ToString();
+	}
+
+	public static string GetSaveEffectGraphFilter()
+	{
+		var sb = new StringBuilder();
+
+		var effectGraph = GetLocalized(
+			"#smix.ui.filter.effectgraph",
+			new()
+			{
+				["ProjectName"] = SandMix.ProjectName
+			}
+		);
+
+		sb.Append( effectGraph );
+		sb.Append( " (*." );
+		sb.Append( EffectGraphResource.FileExtension );
+		sb.Append( ")" );
+
+		sb.Append( ";;" );
+
+		sb.Append( GetAllFiles() );
+
+		return sb.ToString();
+	}
+
+	private static string GetAllFiles()
+	{
+		return GetLocalized( "#smix.ui.filter.allfiles" ) + " (*.*)";
 	}
 }

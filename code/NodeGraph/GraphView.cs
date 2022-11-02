@@ -60,6 +60,21 @@ public class GraphView : GraphicsView
 		Show();
 	}
 
+	public void UpdateLanguage()
+	{
+		if ( !IsValid )
+		{
+			return;
+		}
+	
+		foreach ( var node in Nodes )
+		{
+			node.UpdateLanguage();
+		}
+
+		Update();
+	}
+
 	public override void OnDestroyed()
 	{
 		base.OnDestroyed();
@@ -777,6 +792,8 @@ public class GraphView : GraphicsView
 				undoState.Creation = true;
 				undoState.Graph = pasteGraph;
 				UndoStates.Push( undoState );
+
+				NodeSelect?.Invoke( null, false );
 			}
 		}
 		catch ( Exception ex )

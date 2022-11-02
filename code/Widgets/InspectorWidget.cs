@@ -40,6 +40,20 @@ public class InspectorWidget : DockWidget
 
 		StartInspecting( null );
 	}
+	public void UpdateLanguage()
+	{
+		if ( !IsValid )
+		{
+			return;
+		}
+
+		Title = Util.GetLocalized( "#smix.ui.inspector" );
+
+		if ( CurrentNodeUI is not null )
+		{
+			StartInspecting( CurrentNodeUI, false );
+		}
+	}
 
 	public override void ChildValuesChanged( Widget source )
 	{

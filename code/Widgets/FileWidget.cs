@@ -35,11 +35,29 @@ public class FileWidget : DockWidget
 	public FileWidget( Widget parent, PreviewWidget preview, InspectorWidget inspector )
 		: base( null, SandMixTool.BaseIcon, parent )
 	{
-		Title = Util.GetLocalized( "#smix.ui.graphview" );
+		SetTitle();
 		Preview = preview;
 		Inspector = inspector;
 
 		UpdateWindowDressing();
+	}
+	
+	private void SetTitle()
+	{
+		Title = Util.GetLocalized( "#smix.ui.graphview" );
+	}
+
+	public void UpdateLanguage()
+	{
+		if ( !IsValid )
+		{
+			return;
+		}
+
+		SetTitle();
+		GraphView?.UpdateLanguage();
+
+		Update();
 	}
 
 	public void SetMenuBarOptions( ToolWindow.MenuBarOptions menuOptions )
@@ -186,7 +204,7 @@ public class FileWidget : DockWidget
 			var fd = new FileDialog( this );
 
 			fd.Title = $"Open";
-			fd.SetNameFilter( SandMixTool.GetFindFileFilter() );
+			fd.SetNameFilter( Util.GetFindFileFilter() );
 			fd.SetFindExistingFile();
 
 			if ( !fd.Execute() ) // canceled by user
@@ -284,8 +302,8 @@ public class FileWidget : DockWidget
 	{
 		var filter = Graph.GraphType switch
 		{
-			GraphType.Mix => SandMixTool.GetSaveMixGraphFilter(),
-			GraphType.Effect => SandMixTool.GetSaveEffectGraphFilter(),
+			GraphType.Mix => Util.GetSaveMixGraphFilter(),
+			GraphType.Effect => Util.GetSaveEffectGraphFilter(),
 			_ => throw new Exception( "Unknown graph type" )
 		};
 

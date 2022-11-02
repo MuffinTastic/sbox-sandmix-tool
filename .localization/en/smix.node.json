@@ -6,5 +6,6 @@
 
     "smix.node.input" : "Input",
     "smix.node.output" : "Output",
-    "smix.node.value" : "Value"
+    "smix.node.value" : "Value",
+    "smix.node.defaultvalue" : "Default value"
 }

@@ -1,0 +1,28 @@
+{
+    "smix.node.mixnode" : "Mix",
+    "smix.node.mixnode.description" : "Mixes up to 8 separate audio streams together",
+
+    "smix.node.mixnode.line1"       : "Line 1",
+    "smix.node.mixnode.line1volume" : "Line 1 Volume",
+    
+    "smix.node.mixnode.line2"       : "Line 2",
+    "smix.node.mixnode.line2volume" : "Line 2 Volume",
+    
+    "smix.node.mixnode.line3"       : "Line 3",
+    "smix.node.mixnode.line3volume" : "Line 3 Volume",
+    
+    "smix.node.mixnode.line4"       : "Line 4",
+    "smix.node.mixnode.line4volume" : "Line 4 Volume",
+    
+    "smix.node.mixnode.line5"       : "Line 5",
+    "smix.node.mixnode.line5volume" : "Line 5 Volume",
+    
+    "smix.node.mixnode.line6"       : "Line 6",
+    "smix.node.mixnode.line6volume" : "Line 6 Volume",
+    
+    "smix.node.mixnode.line7"       : "Line 7",
+    "smix.node.mixnode.line7volume" : "Line 7 Volume",
+    
+    "smix.node.mixnode.line8"       : "Line 8",
+    "smix.node.mixnode.line8volume" : "Line 8 Volume"
+}

@@ -3,6 +3,7 @@
   "Type": "tool",
   "Org": "muffin",
   "Ident": "sandmix_tool",
+  "Tags": "",
   "Schema": 1,
   "HasAssets": true,
   "AssetsPath": "",
@@ -12,7 +13,7 @@
   "RootNamespace": "SandMixTool",
   "Metadata": {
     "Compiler": {
-      "RootNamespace": "SandMixTool",
+      "RootNamespace": "SandMix.Tool",
       "DefineConstants": "SANDBOX;ADDON;DEBUG;SMIXTOOL",
       "NoWarn": "1701;1702;1591;"
     }
